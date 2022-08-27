@@ -1,0 +1,14 @@
+coverage
+coverage
+coverage
+coverage
+coverage
+coverage
+.DS_Store
+node_modules
+/build
+/.svelte-kit
+/package
+.env
+.env.*
+!.env.example
