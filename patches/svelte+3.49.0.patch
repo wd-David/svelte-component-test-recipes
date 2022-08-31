@@ -1,0 +1,13 @@
+diff --git a/node_modules/svelte/internal/index.mjs b/node_modules/svelte/internal/index.mjs
+index 50ba503..6d21ec5 100644
+--- a/node_modules/svelte/internal/index.mjs
++++ b/node_modules/svelte/internal/index.mjs
+@@ -1883,7 +1883,7 @@ function init(component, options, instance, create_fragment, not_equal, props, a
+         callbacks: blank_object(),
+         dirty,
+         skip_bound: false,
+-        root: options.target || parent_component.$$.root
++        root: options.target || parent_component?.$$.root
+     };
+     append_styles && append_styles($$.root);
+     let ready = false;

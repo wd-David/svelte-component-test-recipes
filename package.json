@@ -5,6 +5,7 @@
 	"version": "0.0.1",
 	"private": true,
 	"scripts": {
+		"postinstall": "patch-package",
 		"dev": "vite dev",
 		"build": "vite build",
 		"preview": "vite preview",
@@ -30,6 +31,7 @@
 		"eslint-config-prettier": "^8.5.0",
 		"eslint-plugin-svelte3": "^4.0.0",
 		"jsdom": "^20.0.0",
+		"patch-package": "^6.4.7",
 		"prettier": "^2.7.1",
 		"prettier-plugin-svelte": "^2.7.0",
 		"svelte": "^3.49.0",
