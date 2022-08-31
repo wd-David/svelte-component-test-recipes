@@ -9,6 +9,7 @@ describe('Test name slots', () => {
 				<span slot="name"> P. Sherman </span>
 			</${ContactCard}>
 		`);
+
 		// Fallbacks
 		expect(screen.getByText('Unknown address')).toBeInTheDocument();
 		expect(screen.getByText('Unknown email')).toBeInTheDocument();

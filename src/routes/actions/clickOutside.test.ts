@@ -6,6 +6,7 @@ import { clickOutside } from './clickOutside';
 it('Test clickOuside svelte action', async () => {
 	const user = userEvent.setup();
 	const mock = vi.fn();
+
 	render(html`
 		<button>Outside the button</button>
 		<button
@@ -15,6 +16,7 @@ it('Test clickOuside svelte action', async () => {
 			Click outside me!
 		</button>
 	`);
+
 	const button = screen.getByText('Outside the button');
 	await user.click(button);
 	expect(mock).toHaveBeenCalled();

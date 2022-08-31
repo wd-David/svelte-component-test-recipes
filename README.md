@@ -3,6 +3,7 @@
 Svelte component test recipes using Vitest & Testing Library in TypeScript
 
 ## Caveats ⚠️
+
 This repo use [`patch-package`](https://github.com/ds300/patch-package) to work around this issue: [New component root property may throw errors #6584](https://github.com/sveltejs/svelte/issues/6584)
 
 ```diff

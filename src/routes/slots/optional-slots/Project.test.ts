@@ -14,14 +14,19 @@ describe('Test optional slots', () => {
 				</div>
 			</${Project}>
 		`);
+
 		const article = screen.getAllByRole('article')[0];
+
 		expect(article).toHaveClass('has-discussion');
 	});
+
 	it('No slot in Project component', () => {
 		render(html`
 			<${Project} title="Update documentation" tasksCompleted="{18}" totalTasks="{21}" />
 		`);
+
 		const article = screen.getAllByRole('article')[0];
+
 		expect(article).not.toHaveClass('has-discussion');
 		expect(screen.queryByText('Comments')).not.toBeInTheDocument();
 	});

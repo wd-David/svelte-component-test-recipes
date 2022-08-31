@@ -6,11 +6,14 @@ describe('Test DefaultProps component', async () => {
 		render(DefaultProps);
 		expect(screen.queryByText('The answer is a mystery')).toBeInTheDocument();
 	});
+
 	it('set and update prop', async () => {
 		const { component } = render(DefaultProps, { answer: 'I dunno' });
+
 		expect(screen.queryByText('The answer is I dunno')).toBeInTheDocument();
-    // Update prop
-    await component.$set({answer: 'another mystery'})
+
+		// Update prop
+		await component.$set({ answer: 'another mystery' });
 		expect(screen.queryByText('The answer is another mystery')).toBeInTheDocument();
-  });
+	});
 });
