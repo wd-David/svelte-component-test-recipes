@@ -1,3 +1,4 @@
+import type { ComponentProps } from 'svelte';
 import { render, screen } from '@testing-library/svelte';
 import DefaultProps from './DefaultProps.svelte';
 
@@ -15,5 +16,13 @@ describe('Test DefaultProps component', async () => {
 		// Update prop
 		await component.$set({ answer: 'another mystery' });
 		expect(screen.queryByText('The answer is another mystery')).toBeInTheDocument();
+	});
+
+	it('Pass predefined prop to the component', () => {
+		const prop: ComponentProps<DefaultProps> = { answer: 'TypeScript!' };
+
+		render(DefaultProps, prop);
+
+		expect(screen.getByText('The answer is TypeScript!'));
 	});
 });

@@ -12,6 +12,6 @@ it('Test Context API', () => {
 		</$>
 	`);
 
-	expect(screen.getByText('abc@example.com')).toBeInTheDocument()
-	expect(screen.getByText('yes')).toBeInTheDocument()
+	expect(screen.getByText('abc@example.com')).toBeInTheDocument();
+	expect(screen.getByText('yes')).toBeInTheDocument();
 });
