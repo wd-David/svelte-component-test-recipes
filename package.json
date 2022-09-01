@@ -36,6 +36,7 @@
 		"prettier-plugin-svelte": "^2.7.0",
 		"svelte": "^3.49.0",
 		"svelte-check": "^2.9.0",
+		"svelte-fragment-component": "^1.2.0",
 		"svelte-htm": "^1.1.1",
 		"svelte-preprocess": "^4.10.7",
 		"tslib": "^2.4.0",
