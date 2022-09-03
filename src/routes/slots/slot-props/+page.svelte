@@ -1,5 +1,5 @@
 <script>
-	import Hoverable from './Hoverable.svelte';
+	import Hoverable from '$lib/slot-props/Hoverable.svelte';
 </script>
 
 <Hoverable let:hovering={active}>

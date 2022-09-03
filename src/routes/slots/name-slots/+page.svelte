@@ -1,5 +1,5 @@
 <script>
-	import ContactCard from './ContactCard.svelte';
+	import ContactCard from '$lib/name-slots/ContactCard.svelte';
 </script>
 
 <ContactCard>

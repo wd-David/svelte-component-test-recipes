@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { clickOutside } from './clickOutside';
+	import { clickOutside } from '$lib/actions/clickOutside';
 
 	let showModal = true;
 </script>

@@ -1,5 +1,5 @@
 <script>
-	import Box from './Box.svelte';
+	import Box from '$lib/slot-fallbacks/Box.svelte';
 </script>
 
 <Box>

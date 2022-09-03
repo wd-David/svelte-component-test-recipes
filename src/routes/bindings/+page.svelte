@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Keypad from './Keypad.svelte';
+	import Keypad from '$lib/bindings/Keypad.svelte';
 
 	let pin: string;
 	$: view = pin ? pin.replace(/\d(?!$)/g, '•') : 'enter your pin';

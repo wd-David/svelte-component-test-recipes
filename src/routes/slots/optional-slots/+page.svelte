@@ -1,6 +1,6 @@
 <script>
-	import Project from './Project.svelte';
-	import Comment from './Comment.svelte';
+	import Project from '$lib/optional-slots/Project.svelte';
+	import Comment from '$lib/optional-slots/Comment.svelte';
 </script>
 
 <h1>Projects</h1>

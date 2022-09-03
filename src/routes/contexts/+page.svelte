@@ -1,6 +1,6 @@
 <script>
 	import { setContext } from 'svelte';
-	import ContextComponent from './ContextComponent.svelte';
+	import ContextComponent from '$lib/contexts/ContextComponent.svelte';
 
 	const userDetails = { username: 'abc@example.com', islogin: 'yes' };
 
