@@ -1,8 +1,8 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 import type { UserConfig } from 'vite';
-import { configDefaults } from 'vitest/config';
+import { configDefaults, type UserConfig as VitestConfig } from 'vitest/config';
 
-const config: UserConfig = {
+const config: UserConfig & { test: VitestConfig['test'] } = {
 	plugins: [sveltekit()],
 	define: {
 		// Eliminate in-source test code
@@ -15,10 +15,10 @@ const config: UserConfig = {
 		// in-source testing
 		includeSource: ['src/**/*.{js,ts,svelte}'],
 		// Add @testing-library/jest-dom matchers
-		setupFiles: ['./setupTest.js'],
+		setupFiles: ['./setupTest.ts'],
 		// Exclude files in c8
 		coverage: {
-			exclude: ['setupTest.js']
+			exclude: ['setupTest.ts']
 		},
 		deps: {
 			// Put Svelte component here, e.g., inline: [/svelte-multiselect/, /msw/]
