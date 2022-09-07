@@ -9,12 +9,14 @@ import * as stores from '$app/stores';
 
 expect.extend(matchers);
 
+// Mock SvelteKit runtime module $app/environment
 vi.mock('$app/environment', (): typeof environment => ({
 	browser: false,
 	dev: true,
 	prerendering: false
 }));
 
+// Mock SvelteKit runtime module $app/navigation
 vi.mock('$app/navigation', (): typeof navigation => ({
 	afterNavigate: () => {},
 	beforeNavigate: () => {},
@@ -26,6 +28,7 @@ vi.mock('$app/navigation', (): typeof navigation => ({
 	prefetchRoutes: () => Promise.resolve()
 }));
 
+// Mock SvelteKit runtime module $app/stores
 vi.mock('$app/stores', (): typeof stores => {
 	const getStores: typeof stores.getStores = () => {
 		const navigating = readable<Navigation | null>(null);

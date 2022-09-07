@@ -68,12 +68,20 @@ You may notice that there is a `setupTest.ts` file. We can add `@testing-library
 import matchers from '@testing-library/jest-dom/matchers';
 import { expect, vi } from 'vitest';
 import type { Navigation, Page } from '@sveltejs/kit';
+import * as environment from '$app/environment';
 import { readable } from 'svelte/store';
 import * as navigation from '$app/navigation';
 import * as stores from '$app/stores';
 
 // Add custom jest matchers
 expect.extend(matchers);
+
+// Mock SvelteKit runtime module $app/environment
+vi.mock('$app/environment', (): typeof environment => ({
+  browser: false,
+  dev: true,
+  prerendering: false
+}));
 
 // Mock SvelteKit runtime module $app/navigation
 vi.mock('$app/navigation', (): typeof navigation => ({
@@ -158,7 +166,7 @@ Also, the latest update of `svelte-htm` was two years ago, so it might not be a 
 
 > But a relatively better choice now. It would be great if `@testing-library/svelte` could support it natively.
 
-OK! The setup is ready, let's start with a simple component test.
+OK! The setup is ready. Let's start with a simple component test.
 
 ## Testing component props
 
@@ -172,7 +180,7 @@ Here's our svelte component:
 <p>The answer is {answer}</p>
 ```
 
-It's a simple component that only has one prop `answer` with a default value.
+It's a simple component with only one prop `answer` with a default value.
 
 Let's see how to test the default value and pass a new one:
 
@@ -203,7 +211,7 @@ had improved props typing for `render` function:
 
 ![demo-props-test](./static/demo-props-test.gif)
 
-Sometimes you may want to predefined your props before passing, we can use Svelte's native utility type `ComponentProps`. `ComponentProps` takes in a Svelte component type and gives you a type corresponding to the component’s props.
+Sometimes you may want to predefined your props before passing. We can use Svelte's native utility type `ComponentProps`. `ComponentProps` takes in a Svelte component type and gives you a type corresponding to the component’s props.
 
 ```ts
 // $lib/props/DefaultProps.test.ts
@@ -220,11 +228,11 @@ it('Pass predefined prop to the component', () => {
 });
 ```
 
-> Here is a great post from Andrew Lester: [Typing Components in Svelte](https://www.viget.com/articles/typing-components-in-svelte/). Highly recommended.
+> Here is an excellent post from Andrew Lester: [Typing Components in Svelte](https://www.viget.com/articles/typing-components-in-svelte/). Highly recommended.
 
 ## Testing component events
 
-The component that we're going to test has a button, it'll dispatch a custom event `message` when you click on it. It's the same component at [svelte.dev/tutorials](https://svelte.dev/tutorial/component-events).
+The component we're going to test has a button that'll dispatch a custom event `message` when you click on it. It's the same component at [svelte.dev/tutorials](https://svelte.dev/tutorial/component-events).
 
 ```svelte
 // $lib/events/ComponentEvent.svelte
@@ -243,9 +251,9 @@ The component that we're going to test has a button, it'll dispatch a custom eve
 <button on:click={sayHello}> Click to say hello </button>
 ```
 
-To test component events, we need to use a combination of vitest utility function `vi.fn` and Svelte client-side component api `component.$on`. We also use `@testing-library/user-event` instead of built-in `fireEvent` to simulate the user interaction.
+To test component events, we need to combine the vitest utility function `vi.fn` and Svelte client-side component API `component.$on`. We also use `@testing-library/user-event` instead of the built-in `fireEvent` to simulate the user interaction.
 
-> `user-event` applies workarounds and mock the UI layer to simulate user interactions like they would happen in the browser. Check [Common mistakes with React Testing Library  #Not using @testing-library/user-event.](https://kentcdodds.com/blog/common-mistakes-with-react-testing-library#not-using-testing-libraryuser-event)
+> `user-event` applies workarounds and mocks the UI layer to simulate user interactions like they would happen in the browser. Check [Common mistakes with React Testing Library  #Not using @testing-library/user-event.](https://kentcdodds.com/blog/common-mistakes-with-react-testing-library#not-using-testing-libraryuser-event)
 
 ```ts
 // $lib/events/ComponentEvent.test.ts
@@ -271,9 +279,102 @@ it('Test ComponentEvent component', async () => {
 });
 ```
 
-We first create a mock function and pass it to the `component.$on`, so we can monitor it whenever the component dispatch an `message` event.
+We first create a mock function and pass it to the `component.$on`, so we can monitor it whenever the component dispatch a `message` event.
 
 ## Testing the `bind:` directive (two-way binding)
+
+We use `Keypad.svelte` from [svelte.dev/tutorial/component-bindings](https://svelte.dev/tutorial/component-bindings):
+
+```svelte
+// $lib/bindings/Keypad.svelte
+<script lang="ts">
+  import { createEventDispatcher } from 'svelte';
+
+  export let value = '';
+
+  const dispatch = createEventDispatcher();
+
+  const select = (num: number) => () => (value += num);
+  const clear = () => (value = '');
+  const submit = () => dispatch('submit');
+</script>
+
+<div class="keypad">
+  <button on:click={select(1)}>1</button>
+  <button on:click={select(2)}>2</button>
+  <button on:click={select(3)}>3</button>
+  <button on:click={select(4)}>4</button>
+  <button on:click={select(5)}>5</button>
+  <button on:click={select(6)}>6</button>
+  <button on:click={select(7)}>7</button>
+  <button on:click={select(8)}>8</button>
+  <button on:click={select(9)}>9</button>
+
+  <button disabled={!value} on:click={clear}>clear</button>
+  <button on:click={select(0)}>0</button>
+  <button disabled={!value} on:click={submit}>submit</button>
+</div>
+
+<style>
+  .keypad {
+    display: grid;
+    grid-template-columns: repeat(3, 5em);
+    grid-template-rows: repeat(4, 3em);
+    grid-gap: 0.5em;
+  }
+
+  button {
+    margin: 0;
+  }
+</style>
+```
+
+There is no programmatic interface to test `bind:`, `use:`, slots, and Context API. Instead of creating a dummy svelte component (e.g. `TestHarness.svelte`) to test your component, we can use [`svelte-htm`](https://github.com/kenoxa/svelte-htm) to simplify your testing code.
+
+Assume we use `Keypad.svelte` in this way:
+
+```svelte
+<Keypad bind:value={} on:submit={} />
+```
+
+To test the two-way binding of `value`, we use a writeable store as property value:
+
+```ts
+// $lib/bindings/Keypad.test.ts
+import { get, writable } from 'svelte/store';
+import { render, screen } from '@testing-library/svelte';
+import html from 'svelte-htm';
+import Keypad from './Keypad.svelte';
+import userEvent from '@testing-library/user-event';
+
+describe('Test Keypad component', async () => {
+  const user = userEvent.setup();
+
+  it('Test two-way binding', async () => {
+    // Create a writable store to enable reactivity
+    const pin = writable('');
+    const mock = vi.fn();
+
+    render(html`<${Keypad} bind:value=${pin} on:submit=${mock} />`);
+
+    // Get Keypad button "1"
+    const button1 = screen.getByText('1');
+    await user.click(button1);
+    await user.click(button1);
+    expect(get(pin)).toBe('11');
+
+    const submitButton = screen.getByText('submit');
+    await user.click(submitButton);
+    expect(mock).toHaveBeenCalled();
+
+    const clearButton = screen.getByText('clear');
+    await user.click(clearButton);
+    expect(get(pin)).toBe('');
+  });
+});
+
+```
+
 
 ## Testing the `use:` directive (svelte action)
 
