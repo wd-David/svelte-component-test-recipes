@@ -158,7 +158,69 @@ Also, the latest update of `svelte-htm` was two years ago, so it might not be a 
 
 > But a relatively better choice now. It would be great if `@testing-library/svelte` could support it natively.
 
-## Testing a general component with props
+OK! The setup is ready, let's start with a simple component test.
+
+## Testing component props
+
+Here's our svelte component:
+```svelte
+// $lib/props/DefaultProps.svelte
+<script>
+  export let answer = 'a mystery';
+</script>
+
+<p>The answer is {answer}</p>
+```
+
+It's a simple component that only has one prop `answer` with a default value.
+
+Let's see how to test the default value and pass a new one:
+
+```ts
+// $lib/props/DefaultProps.test.ts
+import { render, screen } from '@testing-library/svelte';
+import DefaultProps from './DefaultProps.svelte';
+
+it("doesn't pass prop", () => {
+  render(DefaultProps);
+  expect(screen.queryByText('The answer is a mystery')).toBeInTheDocument();
+});
+
+it('set and update prop', async () => {
+  // Pass your prop to the render function
+  const { component } = render(DefaultProps, { answer: 'I dunno' });
+
+  expect(screen.queryByText('The answer is I dunno')).toBeInTheDocument();
+
+  // Update prop using Svelte's Client-side component API
+  await component.$set({ answer: 'another mystery' });
+  expect(screen.queryByText('The answer is another mystery')).toBeInTheDocument();
+});
+```
+
+If you're using TypeScript, a recent release of `@testing-library/svelte`
+had improved props typing for `render` function:
+
+![demo-props-test](./static/demo-props-test.gif)
+
+Sometimes you may want to predefined your props before passing, we can use Svelte's native utility type `ComponentProps`. `ComponentProps` takes in a Svelte component type and gives you a type corresponding to the component’s props.
+
+```ts
+// $lib/props/DefaultProps.test.ts
+import type { ComponentProps } from 'svelte';
+import { render, screen } from '@testing-library/svelte';
+import DefaultProps from './DefaultProps.svelte';
+
+it('Pass predefined prop to the component', () => {
+  const prop: ComponentProps<DefaultProps> = { answer: 'TypeScript!' };
+
+  render(DefaultProps, prop);
+
+  expect(screen.getByText('The answer is TypeScript!'));
+});
+```
+
+> Here is a great post from Andrew Lester: [Typing Components in Svelte](https://www.viget.com/articles/typing-components-in-svelte/). Highly recommended.
 
 ## Testing component events
 
