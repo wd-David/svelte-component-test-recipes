@@ -3,10 +3,17 @@ import matchers from '@testing-library/jest-dom/matchers';
 import { expect, vi } from 'vitest';
 import type { Navigation, Page } from '@sveltejs/kit';
 import { readable } from 'svelte/store';
+import * as environment from '$app/environment';
 import * as navigation from '$app/navigation';
 import * as stores from '$app/stores';
 
 expect.extend(matchers);
+
+vi.mock('$app/environment', (): typeof environment => ({
+	browser: false,
+	dev: true,
+	prerendering: false
+}));
 
 vi.mock('$app/navigation', (): typeof navigation => ({
 	afterNavigate: () => {},
