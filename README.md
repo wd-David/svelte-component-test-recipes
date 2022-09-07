@@ -224,6 +224,55 @@ it('Pass predefined prop to the component', () => {
 
 ## Testing component events
 
+The component that we're going to test has a button, it'll dispatch a custom event `message` when you click on it. It's the same component at [svelte.dev/tutorials](https://svelte.dev/tutorial/component-events).
+
+```svelte
+// $lib/events/ComponentEvent.svelte
+<script>
+  import { createEventDispatcher } from 'svelte';
+
+  const dispatch = createEventDispatcher();
+
+  function sayHello() {
+    dispatch('message', {
+      text: 'Hello!'
+    });
+  }
+</script>
+
+<button on:click={sayHello}> Click to say hello </button>
+```
+
+To test component events, we need to use a combination of vitest utility function `vi.fn` and Svelte client-side component api `component.$on`. We also use `@testing-library/user-event` instead of built-in `fireEvent` to simulate the user interaction.
+
+> `user-event` applies workarounds and mock the UI layer to simulate user interactions like they would happen in the browser. Check [Common mistakes with React Testing Library  #Not using @testing-library/user-event.](https://kentcdodds.com/blog/common-mistakes-with-react-testing-library#not-using-testing-libraryuser-event)
+
+```ts
+// $lib/events/ComponentEvent.test.ts
+import { render, screen } from '@testing-library/svelte';
+import ComponentEvent from './ComponentEvent.svelte';
+import userEvent from '@testing-library/user-event';
+
+it('Test ComponentEvent component', async () => {
+  const user = userEvent.setup();
+
+  const { component } = render(ComponentEvent);
+
+  // Mock function
+  let text = '';
+  const mock = vi.fn((event) => (text = event.detail.text));
+  component.$on('message', mock);
+
+  const button = screen.getByRole('button');
+  await user.click(button);
+
+  expect(mock).toHaveBeenCalled();
+  expect(text).toBe('Hello!');
+});
+```
+
+We first create a mock function and pass it to the `component.$on`, so we can monitor it whenever the component dispatch an `message` event.
+
 ## Testing the `bind:` directive (two-way binding)
 
 ## Testing the `use:` directive (svelte action)
