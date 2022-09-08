@@ -11,9 +11,13 @@ Svelte component test recipes using Vitest & Testing Library with TypeScript
     - [Get your component props type](#get-your-component-props-type)
   - [Testing component events](#testing-component-events)
   - [Testing the `bind:` directive (two-way binding)](#testing-the-bind-directive-two-way-binding)
-    - [Caveats ⚠️](#caveats-️)
+    - [Caveats - `svelte-htm` ⚠️](#caveats---svelte-htm-️)
   - [Testing the `use:` directive (Svelte Actions)](#testing-the-use-directive-svelte-actions)
   - [Testing slots](#testing-slots)
+    - [Slot fallbacks](#slot-fallbacks)
+    - [Named slots](#named-slots)
+    - [Optional slots ($$slot)](#optional-slots-slot)
+    - [Slot props](#slot-props)
   - [Testing the Context API](#testing-the-context-api)
   - [Testing components which use SvelteKit runtime modules (`$app/*`)](#testing-components-which-use-sveltekit-runtime-modules-app)
   - [Testing data fetching components using `msw`](#testing-data-fetching-components-using-msw)
@@ -327,7 +331,7 @@ There is no programmatic interface to test `bind:`, `use:`, slots, and Context A
 
 ---
 
-### Caveats ⚠️
+### Caveats - `svelte-htm` ⚠️
 
 This repo use [`patch-package`](https://github.com/ds300/patch-package) to work around the issue when you pass `svelte-htm` inline component in a `render` function: [New component root property may throw errors #6584](https://github.com/sveltejs/svelte/issues/6584)
 
@@ -457,6 +461,214 @@ it('Test clickOuside svelte action', async () => {
 ```
 
 ## Testing slots
+
+We have four examples from [svelte.dev/slots](https://svelte.dev/tutorial/slot-fallbacks):
+- Slot fallbacks
+- Named slots
+- Optional slots
+- Slot props
+
+### Slot fallbacks
+
+`$lib/slot-fallbacks/Box.svelte`
+```svelte
+<div class="box">
+  <slot>
+    <em>no content was provided</em>
+  </slot>
+</div>
+```
+
+It's easy to test using `svelte-htm`:
+
+```ts
+// $lib/slot-fallbacks/Box.test.ts
+import { render, screen } from '@testing-library/svelte';
+import html from 'svelte-htm';
+import Box from './Box.svelte';
+
+describe('Test slot fallbacks', () => {
+  it('Put some elements', () => {
+    render(html`<${Box}><h2>Hello!</h2></${Box}>`);
+    expect(screen.getByText('Hello!')).toBeInTheDocument();
+  });
+
+  it('Test slot fallback', () => {
+    render(html`<${Box} />`);
+    expect(screen.getByText('no content was provided')).toBeInTheDocument();
+  });
+});
+```
+
+### Named slots
+
+`$lib/named-slots/ContactCard.svelte`
+```svelte
+<article class="contact-card">
+  <h2>
+    <slot name="name">
+      <span class="missing">Unknown name</span>
+    </slot>
+  </h2>
+
+  <div class="address">
+    <slot name="address">
+      <span class="missing">Unknown address</span>
+    </slot>
+  </div>
+
+  <div class="email">
+    <slot name="email">
+      <span class="missing">Unknown email</span>
+    </slot>
+  </div>
+</article>
+```
+
+```ts
+// $lib/named-slots/ContactCard.test.ts
+import { render, screen } from '@testing-library/svelte';
+import html from 'svelte-htm';
+import ContactCard from './ContactCard.svelte';
+
+describe('Test name slots', () => {
+  it('Only put slot "name"', () => {
+    render(html`
+      <${ContactCard}>
+        <span slot="name"> P. Sherman </span>
+      </${ContactCard}>
+    `);
+
+    // Fallbacks
+    expect(screen.getByText('Unknown address')).toBeInTheDocument();
+    expect(screen.getByText('Unknown email')).toBeInTheDocument();
+  });
+});
+```
+
+### Optional slots ($$slot)
+
+> Check the implementation here: [svelte.dev/tutorial/optional-slots](https://svelte.dev/tutorial/optional-slots) or `src/lib/optional-slots/*`
+
+There are two components and both accept slot:
+- `Comment.svelte`: Accepts any content in the slot
+- `Project.svelte`: Check if named slot `comments` exists
+
+`$lib/optional-slots/Project.svelte`
+
+```svelte
+<script lang="ts">
+  export let title: string;
+  export let tasksCompleted = 0;
+  export let totalTasks = 0;
+</script>
+
+<article class:has-discussion={$$slots.comments}>
+  <div>
+    <h2>{title}</h2>
+    <p>{tasksCompleted}/{totalTasks} tasks completed</p>
+  </div>
+  {#if $$slots.comments}
+    <div class="discussion">
+      <h3>Comments</h3>
+      <slot name="comments" />
+    </div>
+  {/if}
+</article>
+```
+
+We can test the optional slot by checking the class name `has-discussion`:
+
+```ts
+import { render, screen } from '@testing-library/svelte';
+import html from 'svelte-htm';
+import Project from './Project.svelte';
+import Comment from './Comment.svelte';
+
+describe('Test optional slots', () => {
+  it('Put Comment component in Project', () => {
+  render(html`
+    <${Project} title="Add TypeScript support" tasksCompleted="{25}" totalTasks="{57}">
+      <div slot="comments">
+        <${Comment} name="Ecma Script" postedAt=${new Date('2020-08-17T14:12:23')}>
+          <p>Those interface tests are now passing.</p>
+        </${Comment}>
+      </div>
+    </${Project}>
+  `);
+
+  const article = screen.getAllByRole('article')[0];
+
+  expect(article).toHaveClass('has-discussion');
+  });
+
+  it('No slot in Project component', () => {
+  render(html`
+    <${Project} title="Update documentation" tasksCompleted="{18}" totalTasks="{21}" />
+  `);
+
+  const article = screen.getAllByRole('article')[0];
+
+  expect(article).not.toHaveClass('has-discussion');
+  expect(screen.queryByText('Comments')).not.toBeInTheDocument();
+  });
+});
+
+```
+
+### Slot props
+
+`$lib/slot-props/Hoverable.svelte`
+```svelte
+<script lang="ts">
+  let hovering: boolean;
+
+  function enter() {
+    hovering = true;
+  }
+
+  function leave() {
+    hovering = false;
+  }
+</script>
+
+<div on:mouseenter={enter} on:mouseleave={leave}>
+  <slot {hovering} />
+</div>
+```
+
+To test the slot prop, we can create a writable store and subscribe to the `let:hovering`, and use `user.hover` to simulate hovering, which is not viable using native `fireEvent`:
+
+```ts
+import { get, writable } from 'svelte/store';
+import { render, screen } from '@testing-library/svelte';
+import html from 'svelte-htm';
+import Hoverable from './Hoverable.svelte';
+import userEvent from '@testing-library/user-event';
+
+it('Test slot props', async () => {
+  const user = userEvent.setup();
+  const hovering = writable(false);
+
+  render(html`
+    <${Hoverable} let:hovering=${hovering}>
+      <div data-testid="hover" class:active=${hovering}>
+          <p>Hover over me!</p>
+      </div>
+    </${Hoverable}>
+  `);
+
+  const element = screen.getByText('Hover over me!');
+  await user.hover(element);
+
+  expect(get(hovering)).toBeTruthy();
+  expect(screen.getByTestId('hover')).toHaveClass('active');
+});
+```
+
+
+
+
 
 ## Testing the Context API
 

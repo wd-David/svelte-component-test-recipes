@@ -33,8 +33,8 @@
 			<li class:active={$page.url.pathname === '/contexts'}>
 				<a data-sveltekit-prefetch href="/contexts">Context API</a>
 			</li>
-			<li class:active={$page.url.pathname === '/slots/name-slots'}>
-				<a data-sveltekit-prefetch href="/slots/name-slots">Slots - Name Slots</a>
+			<li class:active={$page.url.pathname === '/slots/named-slots'}>
+				<a data-sveltekit-prefetch href="/slots/named-slots">Slots - Name Slots</a>
 			</li>
 			<li class:active={$page.url.pathname === '/slots/optional-slots'}>
 				<a data-sveltekit-prefetch href="/slots/optional-slots">Slots - Optional Slots</a>
