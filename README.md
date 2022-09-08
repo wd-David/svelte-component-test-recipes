@@ -1,8 +1,22 @@
 # Svelte Component Test Recipes (WIP)
 
-Svelte component test recipes using Vitest & Testing Library in TypeScript
+Svelte component test recipes using Vitest & Testing Library with TypeScript
 
 ---
+## Table of Contents
+- [Svelte Component Test Recipes (WIP)](#svelte-component-test-recipes-wip)
+  - [Table of Contents](#table-of-contents)
+  - [Setup](#setup)
+  - [Testing component props](#testing-component-props)
+  - [Testing component events](#testing-component-events)
+  - [Testing the `bind:` directive (two-way binding)](#testing-the-bind-directive-two-way-binding)
+    - [Caveats ⚠️](#caveats-️)
+  - [Testing the `use:` directive (svelte action)](#testing-the-use-directive-svelte-action)
+  - [Testing slots](#testing-slots)
+  - [Testing the Context API](#testing-the-context-api)
+  - [Testing components which use SvelteKit runtime modules (`$app/*`)](#testing-components-which-use-sveltekit-runtime-modules-app)
+  - [Testing data fetching components using `msw`](#testing-data-fetching-components-using-msw)
+
 
 In this repo, we'll use `vitest`, `@testing-library/svelte`, and `svelte-htm` to test Svelte components that seemed to be hard to test. Such as **two-way bindings**, **name slots**, **Context API**, ...etc.
 
@@ -68,8 +82,8 @@ You may notice that there is a `setupTest.ts` file. We can add `@testing-library
 import matchers from '@testing-library/jest-dom/matchers';
 import { expect, vi } from 'vitest';
 import type { Navigation, Page } from '@sveltejs/kit';
-import * as environment from '$app/environment';
 import { readable } from 'svelte/store';
+import * as environment from '$app/environment';
 import * as navigation from '$app/navigation';
 import * as stores from '$app/stores';
 
@@ -142,37 +156,14 @@ vi.mock('$app/stores', (): typeof stores => {
 
 > SvelteKit runtime modules like `$app/stores` and `$app/navigation` are not set until SvelteKit's start function is called, which means you won't have them in a test environment because tests are isolated. In the context of unit testing, any small gaps in functionality can be resolved by simply mocking that module.
 
-
-### Caveats ⚠️
-
-This repo use [`patch-package`](https://github.com/ds300/patch-package) to work around the issue when you pass `svelte-htm` inline component in a `render` function: [New component root property may throw errors #6584](https://github.com/sveltejs/svelte/issues/6584)
-
-Here are the steps:
-
-1. Change the source code in the `node_modules`:
-
-```diff
-// /node_modules/svelte/internal/index.mjs
-- root: options.target || parent_component.$$.root
-+ root: options.target || parent_component?.$$.root
-```
-
-2. Run `npx patch-package svelte`
-3. Add `"postinstall": "patch-package"` script in your `package.json`
-
-It can be fixed by [[fix] check for parent_component before accessing root #6646](https://github.com/sveltejs/svelte/pull/6646).
-
-Also, the latest update of `svelte-htm` was two years ago, so it might not be a good choice in the longer term.
-
-> But a relatively better choice now. It would be great if `@testing-library/svelte` could support it natively.
-
 OK! The setup is ready. Let's start with a simple component test.
 
 ## Testing component props
 
 Here's our svelte component:
+
+`$lib/props/DefaultProps.svelte`
 ```svelte
-// $lib/props/DefaultProps.svelte
 <script>
   export let answer = 'a mystery';
 </script>
@@ -232,10 +223,10 @@ it('Pass predefined prop to the component', () => {
 
 ## Testing component events
 
-The component we're going to test has a button that'll dispatch a custom event `message` when you click on it. It's the same component at [svelte.dev/tutorials](https://svelte.dev/tutorial/component-events).
+The component we're going to test has a button that'll dispatch a custom event `message` when you click on it. It's the component from [svelte.dev/tutorials/component-events](https://svelte.dev/tutorial/component-events).
 
+`$lib/events/ComponentEvent.svelte`
 ```svelte
-// $lib/events/ComponentEvent.svelte
 <script>
   import { createEventDispatcher } from 'svelte';
 
@@ -251,7 +242,7 @@ The component we're going to test has a button that'll dispatch a custom event `
 <button on:click={sayHello}> Click to say hello </button>
 ```
 
-To test component events, we need to combine the vitest utility function `vi.fn` and Svelte client-side component API `component.$on`. We also use `@testing-library/user-event` instead of the built-in `fireEvent` to simulate the user interaction.
+To test component events, we need to combine the vitest utility function [`vi.fn`](https://vitest.dev/api/#vi-fn) and Svelte client-side component API [`component.$on`](https://svelte.dev/docs#run-time-client-side-component-api-$on). We also use [`@testing-library/user-event`](https://github.com/testing-library/user-event) instead of the built-in `fireEvent` to simulate the user interaction.
 
 > `user-event` applies workarounds and mocks the UI layer to simulate user interactions like they would happen in the browser. Check [Common mistakes with React Testing Library  #Not using @testing-library/user-event.](https://kentcdodds.com/blog/common-mistakes-with-react-testing-library#not-using-testing-libraryuser-event)
 
@@ -285,8 +276,8 @@ We first create a mock function and pass it to the `component.$on`, so we can mo
 
 We use `Keypad.svelte` from [svelte.dev/tutorial/component-bindings](https://svelte.dev/tutorial/component-bindings):
 
+`$lib/bindings/Keypad.svelte`
 ```svelte
-// $lib/bindings/Keypad.svelte
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
 
@@ -330,6 +321,27 @@ We use `Keypad.svelte` from [svelte.dev/tutorial/component-bindings](https://sve
 ```
 
 There is no programmatic interface to test `bind:`, `use:`, slots, and Context API. Instead of creating a dummy svelte component (e.g. `TestHarness.svelte`) to test your component, we can use [`svelte-htm`](https://github.com/kenoxa/svelte-htm) to simplify your testing code.
+
+---
+
+### Caveats ⚠️
+
+This repo use [`patch-package`](https://github.com/ds300/patch-package) to work around the issue when you pass `svelte-htm` inline component in a `render` function: [New component root property may throw errors #6584](https://github.com/sveltejs/svelte/issues/6584)
+
+Here are the steps:
+
+1. Change the source code in the `node_modules`:
+
+```diff
+// /node_modules/svelte/internal/index.mjs
+- root: options.target || parent_component.$$.root
++ root: options.target || parent_component?.$$.root
+```
+
+2. Run `npx patch-package svelte`
+3. Add `"postinstall": "patch-package"` script in your `package.json`
+
+---
 
 Assume we use `Keypad.svelte` in this way:
 
@@ -375,11 +387,12 @@ describe('Test Keypad component', async () => {
 
 ```
 
-
 ## Testing the `use:` directive (svelte action)
 
 ## Testing slots
 
 ## Testing the Context API
 
-## Testing component with SvelteKit runtime modules (`$app/*`)
+## Testing components which use SvelteKit runtime modules (`$app/*`)
+
+## Testing data fetching components using `msw`
