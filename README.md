@@ -8,10 +8,11 @@ Svelte component test recipes using Vitest & Testing Library with TypeScript
   - [Table of Contents](#table-of-contents)
   - [Setup](#setup)
   - [Testing component props](#testing-component-props)
+    - [Get your component props type](#get-your-component-props-type)
   - [Testing component events](#testing-component-events)
   - [Testing the `bind:` directive (two-way binding)](#testing-the-bind-directive-two-way-binding)
     - [Caveats ⚠️](#caveats-️)
-  - [Testing the `use:` directive (svelte action)](#testing-the-use-directive-svelte-action)
+  - [Testing the `use:` directive (Svelte Actions)](#testing-the-use-directive-svelte-actions)
   - [Testing slots](#testing-slots)
   - [Testing the Context API](#testing-the-context-api)
   - [Testing components which use SvelteKit runtime modules (`$app/*`)](#testing-components-which-use-sveltekit-runtime-modules-app)
@@ -197,6 +198,8 @@ it('set and update prop', async () => {
 });
 ```
 
+### Get your component props type
+
 If you're using TypeScript, a recent release of `@testing-library/svelte`
 had improved props typing for `render` function:
 
@@ -242,9 +245,9 @@ The component we're going to test has a button that'll dispatch a custom event `
 <button on:click={sayHello}> Click to say hello </button>
 ```
 
-To test component events, we need to combine the vitest utility function [`vi.fn`](https://vitest.dev/api/#vi-fn) and Svelte client-side component API [`component.$on`](https://svelte.dev/docs#run-time-client-side-component-api-$on). We also use [`@testing-library/user-event`](https://github.com/testing-library/user-event) instead of the built-in `fireEvent` to simulate the user interaction.
+To test component events, we use a combination of vitest utility function [`vi.fn`](https://vitest.dev/api/#vi-fn) and the Svelte client-side component API [`component.$on`](https://svelte.dev/docs#run-time-client-side-component-api-$on). We also use [`@testing-library/user-event`](https://github.com/testing-library/user-event) instead of the built-in `fireEvent` to simulate user interactions.
 
-> `user-event` applies workarounds and mocks the UI layer to simulate user interactions like they would happen in the browser. Check [Common mistakes with React Testing Library  #Not using @testing-library/user-event.](https://kentcdodds.com/blog/common-mistakes-with-react-testing-library#not-using-testing-libraryuser-event)
+> `user-event` applies workarounds and mocks the UI layer to simulate user interactions like they would happen in the browser. Check [Common mistakes with React Testing Library  #Not using @testing-library/user-event](https://kentcdodds.com/blog/common-mistakes-with-react-testing-library#not-using-testing-libraryuser-event).
 
 ```ts
 // $lib/events/ComponentEvent.test.ts
@@ -343,7 +346,7 @@ Here are the steps:
 
 ---
 
-Assume we use `Keypad.svelte` in this way:
+Assume we use `Keypad.svelte` in one of the `+page.svelte`:
 
 ```svelte
 <Keypad bind:value={} on:submit={} />
@@ -387,7 +390,71 @@ describe('Test Keypad component', async () => {
 
 ```
 
-## Testing the `use:` directive (svelte action)
+## Testing the `use:` directive (Svelte Actions)
+
+We use the example from [svelte.dev/tutorial/actions](https://svelte.dev/tutorial/actions):
+
+```ts
+// $lib/actions/clickOutside.ts
+export function clickOutside(node: HTMLElement) {
+  const handleClick = (event: Event) => {
+    if (!node.contains(event.target as Node)) {
+      node.dispatchEvent(new CustomEvent('outclick'));
+    }
+  };
+
+  document.addEventListener('click', handleClick, true);
+
+  return {
+    destroy() {
+      document.removeEventListener('click', handleClick, true);
+    }
+  };
+}
+```
+
+Then use it in `src/routes/actions/+page.svelte`:
+
+```svelte
+<script lang="ts">
+  import { clickOutside } from '$lib/actions/clickOutside';
+
+  let showModal = true;
+</script>
+
+<button on:click={() => (showModal = true)}>Show Modal</button>
+{#if showModal}
+  <div class="box" use:clickOutside on:outclick={() => (showModal = false)}>Click outside me!</div>
+{/if}
+```
+
+To test svelte actions, we actually test the function but not the component which use the function. Be careful that we need to use `use:action=${/** yourActionFunction *}` in `svelte-htm`'s tagged templates:
+
+```ts
+import { render, screen } from '@testing-library/svelte';
+import html from 'svelte-htm';
+import userEvent from '@testing-library/user-event';
+import { clickOutside } from './clickOutside';
+
+it('Test clickOuside svelte action', async () => {
+  const user = userEvent.setup();
+  const mock = vi.fn();
+
+  render(html`
+    <button>Outside the button</button>
+    <button
+      use:action=${clickOutside /** or (node) => yourAction(node, params) */}
+      on:outclick=${mock}
+    >
+      Click outside me!
+    </button>
+  `);
+
+  const button = screen.getByText('Outside the button');
+  await user.click(button);
+  expect(mock).toHaveBeenCalled();
+});
+```
 
 ## Testing slots
 
