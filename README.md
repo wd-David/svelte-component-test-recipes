@@ -19,7 +19,7 @@ Svelte component test recipes using Vitest & Testing Library with TypeScript
     - [Optional slots ($$slot)](#optional-slots-slot)
     - [Slot props](#slot-props)
   - [Testing the Context API](#testing-the-context-api)
-  - [Testing components which use SvelteKit runtime modules (`$app/*`)](#testing-components-which-use-sveltekit-runtime-modules-app)
+  - [Testing components that use SvelteKit runtime modules (`$app/*`)](#testing-components-that-use-sveltekit-runtime-modules-app)
   - [Testing data fetching components using `msw`](#testing-data-fetching-components-using-msw)
 
 
@@ -432,7 +432,7 @@ Then use it in `src/routes/actions/+page.svelte`:
 {/if}
 ```
 
-To test svelte actions, we actually test the function but not the component which use the function. Be careful that we need to use `use:action=${/** yourActionFunction *}` in `svelte-htm`'s tagged templates:
+To test svelte actions, we test the function but not the component which uses the function. Be careful that we need to use `use:action=${/** yourActionFunction *}` in `svelte-htm`'s tagged templates:
 
 ```ts
 import { render, screen } from '@testing-library/svelte';
@@ -550,7 +550,7 @@ describe('Test name slots', () => {
 
 > Check the implementation here: [svelte.dev/tutorial/optional-slots](https://svelte.dev/tutorial/optional-slots) or `src/lib/optional-slots/*`
 
-There are two components and both accept slot:
+There are two components, and both accept slots:
 - `Comment.svelte`: Accepts any content in the slot
 - `Project.svelte`: Check if named slot `comments` exists
 
@@ -637,7 +637,7 @@ describe('Test optional slots', () => {
 </div>
 ```
 
-To test the slot prop, we can create a writable store and subscribe to the `let:hovering`, and use `user.hover` to simulate hovering, which is not viable using native `fireEvent`:
+To test the slot prop, we can create a writable store and subscribe to the `let:hovering`, and use `user.hover` to simulate hovering, which is not viable using the native `fireEvent`:
 
 ```ts
 import { get, writable } from 'svelte/store';
@@ -666,12 +666,8 @@ it('Test slot props', async () => {
 });
 ```
 
-
-
-
-
 ## Testing the Context API
 
-## Testing components which use SvelteKit runtime modules (`$app/*`)
+## Testing components that use SvelteKit runtime modules (`$app/*`)
 
 ## Testing data fetching components using `msw`
