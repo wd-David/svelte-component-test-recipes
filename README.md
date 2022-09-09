@@ -159,7 +159,12 @@ vi.mock('$app/stores', (): typeof stores => {
 ```
 > The `@testing-library/jest-dom` library provides a set of custom jest matchers that you can use to extend vitest. These will make your tests more declarative and clear to read and maintain. You can also check [Common mistakes with React Testing Library #Using the wrong-assertion](https://kentcdodds.com/blog/common-mistakes-with-react-testing-library#using-the-wrong-assertion).
 
-> SvelteKit runtime modules like `$app/stores` and `$app/navigation` are not set until SvelteKit's start function is called, which means you won't have them in a test environment because tests are isolated. In the context of unit testing, any small gaps in functionality can be resolved by simply mocking that module.
+> SvelteKit runtime modules like `$app/stores` and `$app/navigation` are not set until SvelteKit's start function is called, which means you won't have them in a test environment because tests are isolated.
+>
+> This error occurs if we test the component which uses `$app` modules without mocking them:
+> ![runtime-module-error](./static/runtime-module-error.jpg)
+>
+>In the context of unit testing, any small gaps in functionality can be resolved by simply mocking that module.
 
 OK! The setup is ready. Let's start with a simple component test.
 
@@ -668,6 +673,97 @@ it('Test slot props', async () => {
 
 ## Testing the Context API
 
+Here is the component that uses `getContext`:
+
+`$lib/contexts/ContextComponent.svelte`
+```svelte
+<script>
+  import { getContext } from 'svelte';
+
+  const userDetails = getContext('user-details');
+</script>
+
+<div>
+  <div>
+    <strong>User Name:</strong>
+    {userDetails.username}
+  </div>
+
+  <div>
+    <strong>User Login Status:</strong>
+    {userDetails.islogin}
+  </div>
+</div>
+```
+
+We can create a parent component that does `setContext` to test the Context API. We use [`svelte-fragment-component`](https://github.com/kenoxa/svelte-fragment-component#readme), which provides some useful component lifecycle properties and a context property. In combination with `svelte-htm` the example could be written as:
+
+```ts
+// $lib/contexts/ContextComponent.test.ts
+import { render, screen } from '@testing-library/svelte';
+import html from 'svelte-htm';
+import Fragment from 'svelte-fragment-component';
+import ContextComponent from './ContextComponent.svelte';
+
+it('Test Context API', () => {
+  const userDetails = { username: 'abc@example.com', islogin: 'yes' };
+
+  render(html`
+    <${Fragment} context=${{ 'user-details': userDetails }}>
+      <${ContextComponent}/>
+    </$>
+  `);
+
+  expect(screen.getByText('abc@example.com')).toBeInTheDocument();
+  expect(screen.getByText('yes')).toBeInTheDocument();
+});
+
+```
+
 ## Testing components that use SvelteKit runtime modules (`$app/*`)
+
+Sometimes your component needs to interact with SvelteKit modules like `$app/stores` or `$app/navigation`:
+
+```svelte
+<script lang="ts">
+  import { page } from '$app/stores';
+  import logo from './svelte-logo.svg';
+</script>
+
+<header>
+  <nav>
+    <svg viewBox="0 0 2 3" aria-hidden="true">
+      <path d="M0,0 L1,2 C1.5,3 1.5,3 2,3 L2,0 Z" />
+    </svg>
+    <ul>
+      <li class:active={$page.url.pathname === '/'}>
+        <a data-sveltekit-prefetch href="/">Home</a>
+      </li>
+      <li class:active={$page.url.pathname === '/about'}>
+        <a data-sveltekit-prefetch href="/about">About</a>
+      </li>
+    </ul>
+  </nav>
+</header>
+```
+
+And a test might look like this:
+
+```ts
+import { render, screen } from '@testing-library/svelte';
+import Header from './Header.svelte';
+
+it('Render About page', () => {
+  render(Header);
+
+  const home = screen.getByText('Home');
+  expect(home).toBeInTheDocument();
+
+  const about = screen.getByText('About');
+  expect(about).toBeInTheDocument();
+});
+```
+
+All we need to do to pass our test is mock the SvelteKit runtime modules. (Please check the [Setup](#setup) section.)
 
 ## Testing data fetching components using `msw`
