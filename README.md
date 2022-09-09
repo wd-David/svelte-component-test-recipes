@@ -7,6 +7,8 @@ Svelte component test recipes using Vitest & Testing Library with TypeScript
 - [Svelte Component Test Recipes (WIP)](#svelte-component-test-recipes-wip)
   - [Table of Contents](#table-of-contents)
   - [Setup](#setup)
+    - [`vite.config.ts`](#viteconfigts)
+    - [`setupTest.ts`](#setuptestts)
   - [Testing component props](#testing-component-props)
     - [Get your component props type](#get-your-component-props-type)
   - [Testing component events](#testing-component-events)
@@ -40,6 +42,8 @@ npm install -D @testing-library/jest-dom  @testing-library/dom @testing-library/
 npm install -D svelte-htm svelte-fragment-component patch-package
 
 ```
+
+### `vite.config.ts`
 
 `Vitest` can read your configuration in your existing `vite.config.(js|ts)` file, and here is my setup:
 
@@ -78,6 +82,8 @@ const config: UserConfig & { test: VitestConfig['test'] } = {
 
 export default config;
 ```
+
+### `setupTest.ts`
 
 You may notice that there is a `setupTest.ts` file. We can add `@testing-library/jest-dom` matchers & mocks of SvelteKit there:
 
@@ -764,6 +770,6 @@ it('Render About page', () => {
 });
 ```
 
-All we need to do to pass our test is mock the SvelteKit runtime modules. (Please check the [Setup](#setup) section.)
+All we need to do to pass our test is mock the SvelteKit runtime modules. (Please check the [`setupTest.ts`](#setuptestts) section.)
 
 ## Testing data fetching components using `msw`

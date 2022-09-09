@@ -1,8 +1,8 @@
 diff --git a/node_modules/svelte/internal/index.mjs b/node_modules/svelte/internal/index.mjs
-index ff2e765..2e91a9f 100644
+index 32436e8..123e230 100644
 --- a/node_modules/svelte/internal/index.mjs
 +++ b/node_modules/svelte/internal/index.mjs
-@@ -1878,7 +1878,7 @@ function init(component, options, instance, create_fragment, not_equal, props, a
+@@ -1884,7 +1884,7 @@ function init(component, options, instance, create_fragment, not_equal, props, a
          callbacks: blank_object(),
          dirty,
          skip_bound: false,
