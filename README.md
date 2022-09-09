@@ -3,28 +3,30 @@
 Svelte component test recipes using Vitest & Testing Library with TypeScript
 
 ---
-
 ## Table of Contents
-
 - [Svelte Component Test Recipes (WIP)](#svelte-component-test-recipes-wip)
-  - [Table of Contents](#table-of-contents)
-  - [Setup](#setup)
-    - [`vite.config.ts`](#viteconfigts)
-    - [`setupTest.ts`](#setuptestts)
-  - [Testing component props](#testing-component-props)
-    - [Get your component props type](#get-your-component-props-type)
-  - [Testing component events](#testing-component-events)
-  - [Testing the `bind:` directive (two-way binding)](#testing-the-bind-directive-two-way-binding)
-    - [Caveats - `svelte-htm` ⚠️](#caveats---svelte-htm-️)
-  - [Testing the `use:` directive (Svelte Actions)](#testing-the-use-directive-svelte-actions)
-  - [Testing slots](#testing-slots)
-    - [Slot fallbacks](#slot-fallbacks)
-    - [Named slots](#named-slots)
-    - [Optional slots ($$slot)](#optional-slots-slot)
-    - [Slot props](#slot-props)
-  - [Testing the Context API](#testing-the-context-api)
-  - [Testing components that use SvelteKit runtime modules (`$app/*`)](#testing-components-that-use-sveltekit-runtime-modules-app)
-  - [Testing data fetching components using `msw`](#testing-data-fetching-components-using-msw)
+	- [Table of Contents](#table-of-contents)
+	- [Setup](#setup)
+		- [`vite.config.ts`](#viteconfigts)
+		- [`setupTest.ts`](#setuptestts)
+	- [Testing component props](#testing-component-props)
+		- [Get your component props type](#get-your-component-props-type)
+	- [Testing component events](#testing-component-events)
+	- [Testing the `bind:` directive (two-way binding)](#testing-the-bind-directive-two-way-binding)
+		- [Caveats - `svelte-htm` ⚠️](#caveats---svelte-htm-️)
+	- [Testing the `use:` directive (Svelte Actions)](#testing-the-use-directive-svelte-actions)
+	- [Testing slots](#testing-slots)
+		- [Slot fallbacks](#slot-fallbacks)
+		- [Named slots](#named-slots)
+		- [Optional slots ($$slot)](#optional-slots-slot)
+		- [Slot props](#slot-props)
+	- [Testing the Context API](#testing-the-context-api)
+	- [Testing components that use SvelteKit runtime modules (`$app/*`)](#testing-components-that-use-sveltekit-runtime-modules-app)
+	- [Testing data fetching components using `msw`](#testing-data-fetching-components-using-msw)
+		- [Setup `msw`](#setup-msw)
+		- [Mock REST API](#mock-rest-api)
+	- [Final thoughts](#final-thoughts)
+
 
 In this repo, we'll use `vitest`, `@testing-library/svelte`, and `svelte-htm` to test Svelte components that seemed to be hard to test. Such as **two-way bindings**, **name slots**, **Context API**, ...etc.
 
@@ -55,30 +57,30 @@ import type { UserConfig } from 'vite';
 import { configDefaults, type UserConfig as VitestConfig } from 'vitest/config';
 
 const config: UserConfig & { test: VitestConfig['test'] } = {
-	plugins: [sveltekit()],
-	define: {
-		// Eliminate in-source test code
-		'import.meta.vitest': 'undefined'
-	},
-	test: {
-		// jest like globals
-		globals: true,
-		environment: 'jsdom',
-		// in-source testing
-		includeSource: ['src/**/*.{js,ts,svelte}'],
-		// Add @testing-library/jest-dom matchers & mocks of SvelteKit modules
-		setupFiles: ['./setupTest.ts'],
-		// Exclude files in c8
-		coverage: {
-			exclude: ['setupTest.ts']
-		},
-		deps: {
-			// Put Svelte component here, e.g., inline: [/svelte-multiselect/, /msw/]
-			inline: []
-		},
-		// Exclude playwright tests folder
-		exclude: [...configDefaults.exclude, 'tests']
-	}
+  plugins: [sveltekit()],
+  define: {
+    // Eliminate in-source test code
+    'import.meta.vitest': 'undefined'
+  },
+  test: {
+    // jest like globals
+    globals: true,
+    environment: 'jsdom',
+    // in-source testing
+    includeSource: ['src/**/*.{js,ts,svelte}'],
+    // Add @testing-library/jest-dom matchers & mocks of SvelteKit modules
+    setupFiles: ['./setupTest.ts'],
+    // Exclude files in c8
+    coverage: {
+      exclude: ['setupTest.ts']
+    },
+    deps: {
+      // Put Svelte component here, e.g., inline: [/svelte-multiselect/, /msw/]
+      inline: []
+    },
+    // Exclude playwright tests folder
+    exclude: [...configDefaults.exclude, 'tests']
+  }
 };
 
 export default config;
@@ -104,66 +106,66 @@ expect.extend(matchers);
 
 // Mock SvelteKit runtime module $app/environment
 vi.mock('$app/environment', (): typeof environment => ({
-	browser: false,
-	dev: true,
-	prerendering: false
+  browser: false,
+  dev: true,
+  prerendering: false
 }));
 
 // Mock SvelteKit runtime module $app/navigation
 vi.mock('$app/navigation', (): typeof navigation => ({
-	afterNavigate: () => {},
-	beforeNavigate: () => {},
-	disableScrollHandling: () => {},
-	goto: () => Promise.resolve(),
-	invalidate: () => Promise.resolve(),
-	invalidateAll: () => Promise.resolve(),
-	prefetch: () => Promise.resolve(),
-	prefetchRoutes: () => Promise.resolve()
+  afterNavigate: () => {},
+  beforeNavigate: () => {},
+  disableScrollHandling: () => {},
+  goto: () => Promise.resolve(),
+  invalidate: () => Promise.resolve(),
+  invalidateAll: () => Promise.resolve(),
+  prefetch: () => Promise.resolve(),
+  prefetchRoutes: () => Promise.resolve()
 }));
 
 // Mock SvelteKit runtime module $app/stores
 vi.mock('$app/stores', (): typeof stores => {
-	const getStores: typeof stores.getStores = () => {
-		const navigating = readable<Navigation | null>(null);
-		const page = readable<Page>({
-			url: new URL('http://localhost'),
-			params: {},
-			routeId: null,
-			status: 200,
-			error: null,
-			data: {}
-		});
-		const updated = { subscribe: readable(false).subscribe, check: () => false };
+  const getStores: typeof stores.getStores = () => {
+    const navigating = readable<Navigation | null>(null);
+    const page = readable<Page>({
+      url: new URL('http://localhost'),
+      params: {},
+      routeId: null,
+      status: 200,
+      error: null,
+      data: {}
+    });
+    const updated = { subscribe: readable(false).subscribe, check: () => false };
 
-		return { navigating, page, updated };
-	};
+    return { navigating, page, updated };
+  };
 
-	const page: typeof stores.page = {
-		subscribe(fn) {
-			return getStores().page.subscribe(fn);
-		}
-	};
-	const navigating: typeof stores.navigating = {
-		subscribe(fn) {
-			return getStores().navigating.subscribe(fn);
-		}
-	};
-	const updated: typeof stores.updated = {
-		subscribe(fn) {
-			return getStores().updated.subscribe(fn);
-		},
-		check: () => false
-	};
+  const page: typeof stores.page = {
+    subscribe(fn) {
+      return getStores().page.subscribe(fn);
+    }
+  };
+  const navigating: typeof stores.navigating = {
+    subscribe(fn) {
+      return getStores().navigating.subscribe(fn);
+    }
+  };
+  const updated: typeof stores.updated = {
+    subscribe(fn) {
+      return getStores().updated.subscribe(fn);
+    },
+    check: () => false
+  };
 
-	return {
-		getStores,
-		navigating,
-		page,
-		updated
-	};
+  return {
+    getStores,
+    navigating,
+    page,
+    updated
+  };
 });
-```
 
+```
 > The `@testing-library/jest-dom` library provides a set of custom jest matchers that you can use to extend vitest. These will make your tests more declarative and clear to read and maintain. You can also check [Common mistakes with React Testing Library #Using the wrong-assertion](https://kentcdodds.com/blog/common-mistakes-with-react-testing-library#using-the-wrong-assertion).
 
 > SvelteKit runtime modules like `$app/stores` and `$app/navigation` are not set until SvelteKit's start function is called, which means you won't have them in a test environment because tests are isolated.
@@ -171,7 +173,7 @@ vi.mock('$app/stores', (): typeof stores => {
 > This error occurs if we test the component which uses `$app` modules without mocking them:
 > ![runtime-module-error](./static/runtime-module-error.jpg)
 >
-> In the context of unit testing, any small gaps in functionality can be resolved by simply mocking that module.
+>In the context of unit testing, any small gaps in functionality can be resolved by simply mocking that module.
 
 OK! The setup is ready. Let's start with a simple component test.
 
@@ -180,10 +182,9 @@ OK! The setup is ready. Let's start with a simple component test.
 Here's our svelte component:
 
 `$lib/props/DefaultProps.svelte`
-
 ```svelte
 <script>
-	export let answer = 'a mystery';
+  export let answer = 'a mystery';
 </script>
 
 <p>The answer is {answer}</p>
@@ -199,19 +200,19 @@ import { render, screen } from '@testing-library/svelte';
 import DefaultProps from './DefaultProps.svelte';
 
 it("doesn't pass prop", () => {
-	render(DefaultProps);
-	expect(screen.queryByText('The answer is a mystery')).toBeInTheDocument();
+  render(DefaultProps);
+  expect(screen.queryByText('The answer is a mystery')).toBeInTheDocument();
 });
 
 it('set and update prop', async () => {
-	// Pass your prop to the render function
-	const { component } = render(DefaultProps, { answer: 'I dunno' });
+  // Pass your prop to the render function
+  const { component } = render(DefaultProps, { answer: 'I dunno' });
 
-	expect(screen.queryByText('The answer is I dunno')).toBeInTheDocument();
+  expect(screen.queryByText('The answer is I dunno')).toBeInTheDocument();
 
-	// Update prop using Svelte's Client-side component API
-	await component.$set({ answer: 'another mystery' });
-	expect(screen.queryByText('The answer is another mystery')).toBeInTheDocument();
+  // Update prop using Svelte's Client-side component API
+  await component.$set({ answer: 'another mystery' });
+  expect(screen.queryByText('The answer is another mystery')).toBeInTheDocument();
 });
 ```
 
@@ -231,11 +232,11 @@ import { render, screen } from '@testing-library/svelte';
 import DefaultProps from './DefaultProps.svelte';
 
 it('Pass predefined prop to the component', () => {
-	const prop: ComponentProps<DefaultProps> = { answer: 'TypeScript!' };
+  const prop: ComponentProps<DefaultProps> = { answer: 'TypeScript!' };
 
-	render(DefaultProps, prop);
+  render(DefaultProps, prop);
 
-	expect(screen.getByText('The answer is TypeScript!'));
+  expect(screen.getByText('The answer is TypeScript!'));
 });
 ```
 
@@ -246,18 +247,17 @@ it('Pass predefined prop to the component', () => {
 The component we're going to test has a button that'll dispatch a custom event `message` when you click on it. It's the component from [svelte.dev/tutorials/component-events](https://svelte.dev/tutorial/component-events).
 
 `$lib/events/ComponentEvent.svelte`
-
 ```svelte
 <script>
-	import { createEventDispatcher } from 'svelte';
+  import { createEventDispatcher } from 'svelte';
 
-	const dispatch = createEventDispatcher();
+  const dispatch = createEventDispatcher();
 
-	function sayHello() {
-		dispatch('message', {
-			text: 'Hello!'
-		});
-	}
+  function sayHello() {
+    dispatch('message', {
+      text: 'Hello!'
+    });
+  }
 </script>
 
 <button on:click={sayHello}> Click to say hello </button>
@@ -265,7 +265,7 @@ The component we're going to test has a button that'll dispatch a custom event `
 
 To test component events, we use a combination of vitest utility function [`vi.fn`](https://vitest.dev/api/#vi-fn) and the Svelte client-side component API [`component.$on`](https://svelte.dev/docs#run-time-client-side-component-api-$on). We also use [`@testing-library/user-event`](https://github.com/testing-library/user-event) instead of the built-in `fireEvent` to simulate user interactions.
 
-> `user-event` applies workarounds and mocks the UI layer to simulate user interactions like they would happen in the browser. Check [Common mistakes with React Testing Library #Not using @testing-library/user-event](https://kentcdodds.com/blog/common-mistakes-with-react-testing-library#not-using-testing-libraryuser-event).
+> `user-event` applies workarounds and mocks the UI layer to simulate user interactions like they would happen in the browser. Check [Common mistakes with React Testing Library  #Not using @testing-library/user-event](https://kentcdodds.com/blog/common-mistakes-with-react-testing-library#not-using-testing-libraryuser-event).
 
 ```ts
 // $lib/events/ComponentEvent.test.ts
@@ -274,20 +274,20 @@ import ComponentEvent from './ComponentEvent.svelte';
 import userEvent from '@testing-library/user-event';
 
 it('Test ComponentEvent component', async () => {
-	const user = userEvent.setup();
+  const user = userEvent.setup();
 
-	const { component } = render(ComponentEvent);
+  const { component } = render(ComponentEvent);
 
-	// Mock function
-	let text = '';
-	const mock = vi.fn((event) => (text = event.detail.text));
-	component.$on('message', mock);
+  // Mock function
+  let text = '';
+  const mock = vi.fn((event) => (text = event.detail.text));
+  component.$on('message', mock);
 
-	const button = screen.getByRole('button');
-	await user.click(button);
+  const button = screen.getByRole('button');
+  await user.click(button);
 
-	expect(mock).toHaveBeenCalled();
-	expect(text).toBe('Hello!');
+  expect(mock).toHaveBeenCalled();
+  expect(text).toBe('Hello!');
 });
 ```
 
@@ -298,47 +298,46 @@ We first create a mock function and pass it to the `component.$on`, so we can mo
 We use `Keypad.svelte` from [svelte.dev/tutorial/component-bindings](https://svelte.dev/tutorial/component-bindings):
 
 `$lib/bindings/Keypad.svelte`
-
 ```svelte
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
+  import { createEventDispatcher } from 'svelte';
 
-	export let value = '';
+  export let value = '';
 
-	const dispatch = createEventDispatcher();
+  const dispatch = createEventDispatcher();
 
-	const select = (num: number) => () => (value += num);
-	const clear = () => (value = '');
-	const submit = () => dispatch('submit');
+  const select = (num: number) => () => (value += num);
+  const clear = () => (value = '');
+  const submit = () => dispatch('submit');
 </script>
 
 <div class="keypad">
-	<button on:click={select(1)}>1</button>
-	<button on:click={select(2)}>2</button>
-	<button on:click={select(3)}>3</button>
-	<button on:click={select(4)}>4</button>
-	<button on:click={select(5)}>5</button>
-	<button on:click={select(6)}>6</button>
-	<button on:click={select(7)}>7</button>
-	<button on:click={select(8)}>8</button>
-	<button on:click={select(9)}>9</button>
+  <button on:click={select(1)}>1</button>
+  <button on:click={select(2)}>2</button>
+  <button on:click={select(3)}>3</button>
+  <button on:click={select(4)}>4</button>
+  <button on:click={select(5)}>5</button>
+  <button on:click={select(6)}>6</button>
+  <button on:click={select(7)}>7</button>
+  <button on:click={select(8)}>8</button>
+  <button on:click={select(9)}>9</button>
 
-	<button disabled={!value} on:click={clear}>clear</button>
-	<button on:click={select(0)}>0</button>
-	<button disabled={!value} on:click={submit}>submit</button>
+  <button disabled={!value} on:click={clear}>clear</button>
+  <button on:click={select(0)}>0</button>
+  <button disabled={!value} on:click={submit}>submit</button>
 </div>
 
 <style>
-	.keypad {
-		display: grid;
-		grid-template-columns: repeat(3, 5em);
-		grid-template-rows: repeat(4, 3em);
-		grid-gap: 0.5em;
-	}
+  .keypad {
+    display: grid;
+    grid-template-columns: repeat(3, 5em);
+    grid-template-rows: repeat(4, 3em);
+    grid-gap: 0.5em;
+  }
 
-	button {
-		margin: 0;
-	}
+  button {
+    margin: 0;
+  }
 </style>
 ```
 
@@ -382,30 +381,31 @@ import Keypad from './Keypad.svelte';
 import userEvent from '@testing-library/user-event';
 
 describe('Test Keypad component', async () => {
-	const user = userEvent.setup();
+  const user = userEvent.setup();
 
-	it('Test two-way binding', async () => {
-		// Create a writable store to enable reactivity
-		const pin = writable('');
-		const mock = vi.fn();
+  it('Test two-way binding', async () => {
+    // Create a writable store to enable reactivity
+    const pin = writable('');
+    const mock = vi.fn();
 
-		render(html`<${Keypad} bind:value=${pin} on:submit=${mock} />`);
+    render(html`<${Keypad} bind:value=${pin} on:submit=${mock} />`);
 
-		// Get Keypad button "1"
-		const button1 = screen.getByText('1');
-		await user.click(button1);
-		await user.click(button1);
-		expect(get(pin)).toBe('11');
+    // Get Keypad button "1"
+    const button1 = screen.getByText('1');
+    await user.click(button1);
+    await user.click(button1);
+    expect(get(pin)).toBe('11');
 
-		const submitButton = screen.getByText('submit');
-		await user.click(submitButton);
-		expect(mock).toHaveBeenCalled();
+    const submitButton = screen.getByText('submit');
+    await user.click(submitButton);
+    expect(mock).toHaveBeenCalled();
 
-		const clearButton = screen.getByText('clear');
-		await user.click(clearButton);
-		expect(get(pin)).toBe('');
-	});
+    const clearButton = screen.getByText('clear');
+    await user.click(clearButton);
+    expect(get(pin)).toBe('');
+  });
 });
+
 ```
 
 ## Testing the `use:` directive (Svelte Actions)
@@ -415,19 +415,19 @@ We use the example from [svelte.dev/tutorial/actions](https://svelte.dev/tutoria
 ```ts
 // $lib/actions/clickOutside.ts
 export function clickOutside(node: HTMLElement) {
-	const handleClick = (event: Event) => {
-		if (!node.contains(event.target as Node)) {
-			node.dispatchEvent(new CustomEvent('outclick'));
-		}
-	};
+  const handleClick = (event: Event) => {
+    if (!node.contains(event.target as Node)) {
+      node.dispatchEvent(new CustomEvent('outclick'));
+    }
+  };
 
-	document.addEventListener('click', handleClick, true);
+  document.addEventListener('click', handleClick, true);
 
-	return {
-		destroy() {
-			document.removeEventListener('click', handleClick, true);
-		}
-	};
+  return {
+    destroy() {
+      document.removeEventListener('click', handleClick, true);
+    }
+  };
 }
 ```
 
@@ -435,14 +435,14 @@ Then use it in `src/routes/actions/+page.svelte`:
 
 ```svelte
 <script lang="ts">
-	import { clickOutside } from '$lib/actions/clickOutside';
+  import { clickOutside } from '$lib/actions/clickOutside';
 
-	let showModal = true;
+  let showModal = true;
 </script>
 
 <button on:click={() => (showModal = true)}>Show Modal</button>
 {#if showModal}
-	<div class="box" use:clickOutside on:outclick={() => (showModal = false)}>Click outside me!</div>
+  <div class="box" use:clickOutside on:outclick={() => (showModal = false)}>Click outside me!</div>
 {/if}
 ```
 
@@ -455,29 +455,28 @@ import userEvent from '@testing-library/user-event';
 import { clickOutside } from './clickOutside';
 
 it('Test clickOuside svelte action', async () => {
-	const user = userEvent.setup();
-	const mock = vi.fn();
+  const user = userEvent.setup();
+  const mock = vi.fn();
 
-	render(html`
-		<button>Outside the button</button>
-		<button
-			use:action=${clickOutside /** or (node) => yourAction(node, params) */}
-			on:outclick=${mock}
-		>
-			Click outside me!
-		</button>
-	`);
+  render(html`
+    <button>Outside the button</button>
+    <button
+      use:action=${clickOutside /** or (node) => yourAction(node, params) */}
+      on:outclick=${mock}
+    >
+      Click outside me!
+    </button>
+  `);
 
-	const button = screen.getByText('Outside the button');
-	await user.click(button);
-	expect(mock).toHaveBeenCalled();
+  const button = screen.getByText('Outside the button');
+  await user.click(button);
+  expect(mock).toHaveBeenCalled();
 });
 ```
 
 ## Testing slots
 
 We have four examples from [svelte.dev/slots](https://svelte.dev/tutorial/slot-fallbacks):
-
 - Slot fallbacks
 - Named slots
 - Optional slots
@@ -486,12 +485,11 @@ We have four examples from [svelte.dev/slots](https://svelte.dev/tutorial/slot-f
 ### Slot fallbacks
 
 `$lib/slot-fallbacks/Box.svelte`
-
 ```svelte
 <div class="box">
-	<slot>
-		<em>no content was provided</em>
-	</slot>
+  <slot>
+    <em>no content was provided</em>
+  </slot>
 </div>
 ```
 
@@ -504,41 +502,40 @@ import html from 'svelte-htm';
 import Box from './Box.svelte';
 
 describe('Test slot fallbacks', () => {
-	it('Put some elements', () => {
-		render(html`<${Box}><h2>Hello!</h2></${Box}>`);
-		expect(screen.getByText('Hello!')).toBeInTheDocument();
-	});
+  it('Put some elements', () => {
+    render(html`<${Box}><h2>Hello!</h2></${Box}>`);
+    expect(screen.getByText('Hello!')).toBeInTheDocument();
+  });
 
-	it('Test slot fallback', () => {
-		render(html`<${Box} />`);
-		expect(screen.getByText('no content was provided')).toBeInTheDocument();
-	});
+  it('Test slot fallback', () => {
+    render(html`<${Box} />`);
+    expect(screen.getByText('no content was provided')).toBeInTheDocument();
+  });
 });
 ```
 
 ### Named slots
 
 `$lib/named-slots/ContactCard.svelte`
-
 ```svelte
 <article class="contact-card">
-	<h2>
-		<slot name="name">
-			<span class="missing">Unknown name</span>
-		</slot>
-	</h2>
+  <h2>
+    <slot name="name">
+      <span class="missing">Unknown name</span>
+    </slot>
+  </h2>
 
-	<div class="address">
-		<slot name="address">
-			<span class="missing">Unknown address</span>
-		</slot>
-	</div>
+  <div class="address">
+    <slot name="address">
+      <span class="missing">Unknown address</span>
+    </slot>
+  </div>
 
-	<div class="email">
-		<slot name="email">
-			<span class="missing">Unknown email</span>
-		</slot>
-	</div>
+  <div class="email">
+    <slot name="email">
+      <span class="missing">Unknown email</span>
+    </slot>
+  </div>
 </article>
 ```
 
@@ -549,17 +546,17 @@ import html from 'svelte-htm';
 import ContactCard from './ContactCard.svelte';
 
 describe('Test name slots', () => {
-	it('Only put slot "name"', () => {
-		render(html`
+  it('Only put slot "name"', () => {
+    render(html`
       <${ContactCard}>
         <span slot="name"> P. Sherman </span>
       </${ContactCard}>
     `);
 
-		// Fallbacks
-		expect(screen.getByText('Unknown address')).toBeInTheDocument();
-		expect(screen.getByText('Unknown email')).toBeInTheDocument();
-	});
+    // Fallbacks
+    expect(screen.getByText('Unknown address')).toBeInTheDocument();
+    expect(screen.getByText('Unknown email')).toBeInTheDocument();
+  });
 });
 ```
 
@@ -568,7 +565,6 @@ describe('Test name slots', () => {
 > Check the implementation here: [svelte.dev/tutorial/optional-slots](https://svelte.dev/tutorial/optional-slots) or `src/lib/optional-slots/*`
 
 There are two components, and both accept slots:
-
 - `Comment.svelte`: Accepts any content in the slot
 - `Project.svelte`: Check if named slot `comments` exists
 
@@ -576,22 +572,22 @@ There are two components, and both accept slots:
 
 ```svelte
 <script lang="ts">
-	export let title: string;
-	export let tasksCompleted = 0;
-	export let totalTasks = 0;
+  export let title: string;
+  export let tasksCompleted = 0;
+  export let totalTasks = 0;
 </script>
 
 <article class:has-discussion={$$slots.comments}>
-	<div>
-		<h2>{title}</h2>
-		<p>{tasksCompleted}/{totalTasks} tasks completed</p>
-	</div>
-	{#if $$slots.comments}
-		<div class="discussion">
-			<h3>Comments</h3>
-			<slot name="comments" />
-		</div>
-	{/if}
+  <div>
+    <h2>{title}</h2>
+    <p>{tasksCompleted}/{totalTasks} tasks completed</p>
+  </div>
+  {#if $$slots.comments}
+    <div class="discussion">
+      <h3>Comments</h3>
+      <slot name="comments" />
+    </div>
+  {/if}
 </article>
 ```
 
@@ -604,8 +600,8 @@ import Project from './Project.svelte';
 import Comment from './Comment.svelte';
 
 describe('Test optional slots', () => {
-	it('Put Comment component in Project', () => {
-		render(html`
+  it('Put Comment component in Project', () => {
+  render(html`
     <${Project} title="Add TypeScript support" tasksCompleted="{25}" totalTasks="{57}">
       <div slot="comments">
         <${Comment} name="Ecma Script" postedAt=${new Date('2020-08-17T14:12:23')}>
@@ -615,43 +611,43 @@ describe('Test optional slots', () => {
     </${Project}>
   `);
 
-		const article = screen.getAllByRole('article')[0];
+  const article = screen.getAllByRole('article')[0];
 
-		expect(article).toHaveClass('has-discussion');
-	});
+  expect(article).toHaveClass('has-discussion');
+  });
 
-	it('No slot in Project component', () => {
-		render(html`
-			<${Project} title="Update documentation" tasksCompleted="{18}" totalTasks="{21}" />
-		`);
+  it('No slot in Project component', () => {
+  render(html`
+    <${Project} title="Update documentation" tasksCompleted="{18}" totalTasks="{21}" />
+  `);
 
-		const article = screen.getAllByRole('article')[0];
+  const article = screen.getAllByRole('article')[0];
 
-		expect(article).not.toHaveClass('has-discussion');
-		expect(screen.queryByText('Comments')).not.toBeInTheDocument();
-	});
+  expect(article).not.toHaveClass('has-discussion');
+  expect(screen.queryByText('Comments')).not.toBeInTheDocument();
+  });
 });
+
 ```
 
 ### Slot props
 
 `$lib/slot-props/Hoverable.svelte`
-
 ```svelte
 <script lang="ts">
-	let hovering: boolean;
+  let hovering: boolean;
 
-	function enter() {
-		hovering = true;
-	}
+  function enter() {
+    hovering = true;
+  }
 
-	function leave() {
-		hovering = false;
-	}
+  function leave() {
+    hovering = false;
+  }
 </script>
 
 <div on:mouseenter={enter} on:mouseleave={leave}>
-	<slot {hovering} />
+  <slot {hovering} />
 </div>
 ```
 
@@ -665,10 +661,10 @@ import Hoverable from './Hoverable.svelte';
 import userEvent from '@testing-library/user-event';
 
 it('Test slot props', async () => {
-	const user = userEvent.setup();
-	const hovering = writable(false);
+  const user = userEvent.setup();
+  const hovering = writable(false);
 
-	render(html`
+  render(html`
     <${Hoverable} let:hovering=${hovering}>
       <div data-testid="hover" class:active=${hovering}>
           <p>Hover over me!</p>
@@ -676,11 +672,11 @@ it('Test slot props', async () => {
     </${Hoverable}>
   `);
 
-	const element = screen.getByText('Hover over me!');
-	await user.hover(element);
+  const element = screen.getByText('Hover over me!');
+  await user.hover(element);
 
-	expect(get(hovering)).toBeTruthy();
-	expect(screen.getByTestId('hover')).toHaveClass('active');
+  expect(get(hovering)).toBeTruthy();
+  expect(screen.getByTestId('hover')).toHaveClass('active');
 });
 ```
 
@@ -689,24 +685,23 @@ it('Test slot props', async () => {
 Here is the component that uses `getContext`:
 
 `$lib/contexts/ContextComponent.svelte`
-
 ```svelte
 <script>
-	import { getContext } from 'svelte';
+  import { getContext } from 'svelte';
 
-	const userDetails = getContext('user-details');
+  const userDetails = getContext('user-details');
 </script>
 
 <div>
-	<div>
-		<strong>User Name:</strong>
-		{userDetails.username}
-	</div>
+  <div>
+    <strong>User Name:</strong>
+    {userDetails.username}
+  </div>
 
-	<div>
-		<strong>User Login Status:</strong>
-		{userDetails.islogin}
-	</div>
+  <div>
+    <strong>User Login Status:</strong>
+    {userDetails.islogin}
+  </div>
 </div>
 ```
 
@@ -720,17 +715,18 @@ import Fragment from 'svelte-fragment-component';
 import ContextComponent from './ContextComponent.svelte';
 
 it('Test Context API', () => {
-	const userDetails = { username: 'abc@example.com', islogin: 'yes' };
+  const userDetails = { username: 'abc@example.com', islogin: 'yes' };
 
-	render(html`
+  render(html`
     <${Fragment} context=${{ 'user-details': userDetails }}>
       <${ContextComponent}/>
     </$>
   `);
 
-	expect(screen.getByText('abc@example.com')).toBeInTheDocument();
-	expect(screen.getByText('yes')).toBeInTheDocument();
+  expect(screen.getByText('abc@example.com')).toBeInTheDocument();
+  expect(screen.getByText('yes')).toBeInTheDocument();
 });
+
 ```
 
 ## Testing components that use SvelteKit runtime modules (`$app/*`)
@@ -739,24 +735,24 @@ Sometimes your component needs to interact with SvelteKit modules like `$app/sto
 
 ```svelte
 <script lang="ts">
-	import { page } from '$app/stores';
-	import logo from './svelte-logo.svg';
+  import { page } from '$app/stores';
+  import logo from './svelte-logo.svg';
 </script>
 
 <header>
-	<nav>
-		<svg viewBox="0 0 2 3" aria-hidden="true">
-			<path d="M0,0 L1,2 C1.5,3 1.5,3 2,3 L2,0 Z" />
-		</svg>
-		<ul>
-			<li class:active={$page.url.pathname === '/'}>
-				<a data-sveltekit-prefetch href="/">Home</a>
-			</li>
-			<li class:active={$page.url.pathname === '/about'}>
-				<a data-sveltekit-prefetch href="/about">About</a>
-			</li>
-		</ul>
-	</nav>
+  <nav>
+    <svg viewBox="0 0 2 3" aria-hidden="true">
+      <path d="M0,0 L1,2 C1.5,3 1.5,3 2,3 L2,0 Z" />
+    </svg>
+    <ul>
+      <li class:active={$page.url.pathname === '/'}>
+        <a data-sveltekit-prefetch href="/">Home</a>
+      </li>
+      <li class:active={$page.url.pathname === '/about'}>
+        <a data-sveltekit-prefetch href="/about">About</a>
+      </li>
+    </ul>
+  </nav>
 </header>
 ```
 
@@ -767,16 +763,166 @@ import { render, screen } from '@testing-library/svelte';
 import Header from './Header.svelte';
 
 it('Render About page', () => {
-	render(Header);
+  render(Header);
 
-	const home = screen.getByText('Home');
-	expect(home).toBeInTheDocument();
+  const home = screen.getByText('Home');
+  expect(home).toBeInTheDocument();
 
-	const about = screen.getByText('About');
-	expect(about).toBeInTheDocument();
+  const about = screen.getByText('About');
+  expect(about).toBeInTheDocument();
 });
 ```
 
-All we need to do to pass our test is mock the SvelteKit runtime modules. (Please check the [`setupTest.ts`](#setuptestts) section.)
+To pass our test, we need to mock the SvelteKit runtime modules. (Please check the [`setupTest.ts`](#setuptestts) section.)
 
 ## Testing data fetching components using `msw`
+
+Sometimes you may want to load some data when a component is mounted.
+We can use [`msw` - Mock Service Worker](https://github.com/mswjs/msw). It will let you mock REST and GraphQL network requests, no more stubbing of `fetch`, `axios`, ...etc.
+
+### Setup `msw`
+
+First, install `msw`:
+`npm install -D msw`
+
+Create a folder `src/mocks` and three files in it:
+
+```ts
+// src/mocks/handlers.ts
+import { rest } from 'msw'
+
+// Define handlers that catch the corresponding requests and return the mock data.
+// Will add handler later
+export const handlers = []
+```
+
+```ts
+// src/mocks/server.ts
+import { setupServer } from 'msw/node';
+import { handlers } from './handlers';
+// This configures a Service Worker with the given request handlers.
+export const server = setupServer(...handlers);
+```
+
+```ts
+// src/mocks/setup.ts
+import { server } from './server';
+
+beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
+afterAll(() => server.close());
+afterEach(() => server.resetHandlers());
+```
+
+We also need to update our `vite.config.ts`:
+
+```diff
+- setupFiles: ['setupTest.ts'],
++ setupFiles: ['setupTest.ts', 'src/mocks/setup.ts'],
+coverage: {
+- exclude: ['setupTest.ts']
++ exclude: ['setupTest.ts', 'src/mocks']
+},
+deps: {
+- inline: []
++ inline: [/msw/]
+}
+```
+
+### Mock REST API
+
+Here is a component that will fetch posts from an external endpoint:
+
+`$lib/data-fetching/ExternalFetch.svelte`
+```svelte
+<script lang="ts">
+  import axios from 'axios';
+
+  interface Post {
+    userId: number;
+    id: number;
+    title: string;
+    body: string;
+  }
+
+  async function getRandomPost(): Promise<Post[]> {
+    const { status, data } = await axios(`https://jsonplaceholder.typicode.com/posts`);
+
+    if (status === 200) {
+      return data;
+    } else {
+      throw new Error(data);
+    }
+  }
+</script>
+
+{#await getRandomPost()}
+  <p>...waiting</p>
+{:then posts}
+  {#each posts as { id, userId, title, body }}
+    <p>Post ID: {id}</p>
+    <p>User ID: {userId}</p>
+    <p>The title is {title}</p>
+    <p>{body}</p>
+  {/each}
+{:catch error}
+  <p style="color: red">{error.message}</p>
+{/await}
+```
+
+> I use `axios` here because there is an issue of `msw`: [Unable to intercept requests on Node 18 #1388](https://github.com/mswjs/msw/issues/1388)
+
+To intercept the request during testing, we'll update `src/mocks/handlers.ts` like this:
+
+```ts
+// src/mocks/handlers.ts
+import { rest } from 'msw';
+
+// Mock Data
+const posts = [
+  {
+    userId: 1,
+    id: 1,
+    title: 'first post title',
+    body: 'first post body'
+  },
+  {
+    userId: 2,
+    id: 5,
+    title: 'second post title',
+    body: 'second post body'
+  },
+  {
+    userId: 3,
+    id: 6,
+    title: 'third post title',
+    body: 'third post body'
+  }
+];
+
+// Define handlers that catch the corresponding requests and return the mock data.
+export const handlers = [
+  rest.get('https://jsonplaceholder.typicode.com/posts', (req, res, ctx) => {
+    return res(ctx.status(200), ctx.json(posts))
+  })
+];
+```
+
+Here is the test file:
+
+```ts
+import { render, screen } from '@testing-library/svelte';
+import ExternalFetch from './ExternalFetch.svelte';
+
+it('render ExternalFetch', async () => {
+  render(ExternalFetch);
+
+  // Initial component state
+  expect(screen.getByText('...waiting')).toBeInTheDocument();
+  // Use await screen.find* instead of the await tick() or act()
+  expect(await screen.findByText('first post body')).toBeInTheDocument();
+});
+```
+
+> Please check [Common mistakes with React Testing Library #Using waitFor to wait for elements that can be queried with find*](https://kentcdodds.com/blog/common-mistakes-with-react-testing-library#using-waitfor-to-wait-for-elements-that-can-be-queried-with-find) for the reason of using `await screen.find*`
+
+## Final thoughts
