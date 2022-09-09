@@ -15,14 +15,14 @@ const config: UserConfig & { test: VitestConfig['test'] } = {
 		// in-source testing
 		includeSource: ['src/**/*.{js,ts,svelte}'],
 		// Add @testing-library/jest-dom matchers & mocks of SvelteKit modules
-		setupFiles: ['./setupTest.ts'],
+		setupFiles: ['setupTest.ts', 'src/mocks/setup.ts'],
 		// Exclude files in c8
 		coverage: {
-			exclude: ['setupTest.ts']
+			exclude: ['setupTest.ts', 'src/mocks']
 		},
 		deps: {
 			// Put Svelte component here, e.g., inline: [/svelte-multiselect/, /msw/]
-			inline: []
+			inline: [/msw/]
 		},
 		// Exclude playwright tests folder
 		exclude: [...configDefaults.exclude, 'tests']
