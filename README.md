@@ -2,35 +2,37 @@
 
 Svelte component test recipes using Vitest & Testing Library with TypeScript
 
+In this repo, we'll use `vitest`, `@testing-library/svelte`, and `svelte-htm` to test Svelte components that seemed to be hard to test. Such as **two-way bindings**, **name slots**, **Context API**, ...etc.
+
+As a Svelte advocate, the fantastic DX is one of the reasons we love Svelte. While component testing is something that I think we can still improve over time.
+
+Feel free to open an issue or send a PR to add more test recipes. 😉
+
 ---
 ## Table of Contents
 - [Svelte Component Test Recipes (WIP)](#svelte-component-test-recipes-wip)
-	- [Table of Contents](#table-of-contents)
-	- [Setup](#setup)
-		- [`vite.config.ts`](#viteconfigts)
-		- [`setupTest.ts`](#setuptestts)
-	- [Testing component props](#testing-component-props)
-		- [Get your component props type](#get-your-component-props-type)
-	- [Testing component events](#testing-component-events)
-	- [Testing the `bind:` directive (two-way binding)](#testing-the-bind-directive-two-way-binding)
-		- [Caveats - `svelte-htm` ⚠️](#caveats---svelte-htm-️)
-	- [Testing the `use:` directive (Svelte Actions)](#testing-the-use-directive-svelte-actions)
-	- [Testing slots](#testing-slots)
-		- [Slot fallbacks](#slot-fallbacks)
-		- [Named slots](#named-slots)
-		- [Optional slots ($$slot)](#optional-slots-slot)
-		- [Slot props](#slot-props)
-	- [Testing the Context API](#testing-the-context-api)
-	- [Testing components that use SvelteKit runtime modules (`$app/*`)](#testing-components-that-use-sveltekit-runtime-modules-app)
-	- [Testing data fetching components using `msw`](#testing-data-fetching-components-using-msw)
-		- [Setup `msw`](#setup-msw)
-		- [Mock REST API](#mock-rest-api)
-	- [Final thoughts](#final-thoughts)
-
-
-In this repo, we'll use `vitest`, `@testing-library/svelte`, and `svelte-htm` to test Svelte components that seemed to be hard to test. Such as **two-way bindings**, **name slots**, **Context API**, ...etc.
-
-Feel free to open an issue or send a PR to add more test recipes. 😉
+  - [Table of Contents](#table-of-contents)
+  - [Setup](#setup)
+    - [`vite.config.ts`](#viteconfigts)
+    - [`setupTest.ts`](#setuptestts)
+    - [Caveats - `svelte-htm` ⚠️](#caveats---svelte-htm-️)
+  - [Testing component props](#testing-component-props)
+    - [Get your component props type](#get-your-component-props-type)
+  - [Testing component events](#testing-component-events)
+  - [Testing the `bind:` directive (two-way binding)](#testing-the-bind-directive-two-way-binding)
+  - [Testing the `use:` directive (Svelte Actions)](#testing-the-use-directive-svelte-actions)
+  - [Testing slots](#testing-slots)
+    - [Slot fallbacks](#slot-fallbacks)
+    - [Named slots](#named-slots)
+    - [Optional slots ($$slot)](#optional-slots-slot)
+    - [Slot props](#slot-props)
+  - [Testing the Context API](#testing-the-context-api)
+  - [Testing components that use SvelteKit runtime modules (`$app/*`)](#testing-components-that-use-sveltekit-runtime-modules-app)
+  - [Testing data fetching components using `msw`](#testing-data-fetching-components-using-msw)
+    - [Setup `msw`](#setup-msw)
+    - [Mock REST API](#mock-rest-api)
+  - [Credits](#credits)
+  - [Resources](#resources)
 
 ## Setup
 
@@ -48,7 +50,7 @@ npm install -D svelte-htm svelte-fragment-component patch-package
 
 ### `vite.config.ts`
 
-`Vitest` can read your configuration in your existing `vite.config.(js|ts)` file, and here is my setup:
+`Vitest` can read your root `vite.config.(js|ts)` to match with the plugins and setup as your Vite app (SvelteKit), and here is my setup:
 
 ```ts
 // vite.config.ts
@@ -175,6 +177,27 @@ vi.mock('$app/stores', (): typeof stores => {
 >
 >In the context of unit testing, any small gaps in functionality can be resolved by simply mocking that module.
 
+### Caveats - `svelte-htm` ⚠️
+
+This repo use [`patch-package`](https://github.com/ds300/patch-package) to work around the issue when you pass `svelte-htm` inline component in a `render` function: [New component root property may throw errors #6584](https://github.com/sveltejs/svelte/issues/6584)
+
+Here are the steps:
+
+1. Change the source code in the `node_modules`:
+
+```diff
+// /node_modules/svelte/internal/index.mjs
+- root: options.target || parent_component.$$.root
++ root: options.target || parent_component?.$$.root
+```
+
+2. Run `npx patch-package svelte`
+3. Add `"postinstall": "patch-package"` script in your `package.json`
+
+> Possible solution: https://github.com/testing-library/svelte-testing-library/issues/48#issuecomment-1240163835
+
+---
+
 OK! The setup is ready. Let's start with a simple component test.
 
 ## Testing component props
@@ -240,7 +263,7 @@ it('Pass predefined prop to the component', () => {
 });
 ```
 
-> Here is an excellent post from Andrew Lester: [Typing Components in Svelte](https://www.viget.com/articles/typing-components-in-svelte/). Highly recommended.
+> I highly recommend reading this excellent post from Andrew Lester: [Typing Components in Svelte](https://www.viget.com/articles/typing-components-in-svelte/).
 
 ## Testing component events
 
@@ -343,26 +366,6 @@ We use `Keypad.svelte` from [svelte.dev/tutorial/component-bindings](https://sve
 
 There is no programmatic interface to test `bind:`, `use:`, slots, and Context API. Instead of creating a dummy svelte component (e.g. `TestHarness.svelte`) to test your component, we can use [`svelte-htm`](https://github.com/kenoxa/svelte-htm) to simplify your testing code.
 
----
-
-### Caveats - `svelte-htm` ⚠️
-
-This repo use [`patch-package`](https://github.com/ds300/patch-package) to work around the issue when you pass `svelte-htm` inline component in a `render` function: [New component root property may throw errors #6584](https://github.com/sveltejs/svelte/issues/6584)
-
-Here are the steps:
-
-1. Change the source code in the `node_modules`:
-
-```diff
-// /node_modules/svelte/internal/index.mjs
-- root: options.target || parent_component.$$.root
-+ root: options.target || parent_component?.$$.root
-```
-
-2. Run `npx patch-package svelte`
-3. Add `"postinstall": "patch-package"` script in your `package.json`
-
----
 
 Assume we use `Keypad.svelte` in one of the `+page.svelte`:
 
@@ -925,4 +928,16 @@ it('render ExternalFetch', async () => {
 
 > Please check [Common mistakes with React Testing Library #Using waitFor to wait for elements that can be queried with find*](https://kentcdodds.com/blog/common-mistakes-with-react-testing-library#using-waitfor-to-wait-for-elements-that-can-be-queried-with-find) for the reason of using `await screen.find*`
 
-## Final thoughts
+## Credits
+
+- [Unit Testing Svelte Components by Svelte Society](https://sveltesociety.dev/recipes/testing-and-debugging/unit-testing-svelte-component)
+- [[Archived] Testing and Debugging Svelte - svelte-society/recipes-mvp by swyx](https://github.com/svelte-society/recipes-mvp/blob/2c7587ad559b3ee22a0caf5e1528bbac34dd475d/testing.md#debugging-svelte-apps-in-vs-code)
+- [Official documents of Svelte Testing Library](https://testing-library.com/docs/svelte-testing-library/intro)
+- [svelte-htm (& core implementations) by @sastan](https://github.com/kenoxa/svelte-htm)
+- [Vitest for unit testing #5285 by @benmccann](https://github.com/sveltejs/kit/discussions/5285)
+
+## Resources
+
+- [Common mistakes with React Testing Library by Kent C. Dodds](https://kentcdodds.com/blog/common-mistakes-with-react-testing-library#not-using-testing-libraryuser-event)
+- [Design Patterns for Building Reusable Svelte Components by Eric Liu](https://render.com/blog/svelte-design-patterns)
+- [Typing Components in Svelte by Andrew Lester](https://www.viget.com/articles/typing-components-in-svelte/)
