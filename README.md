@@ -1,16 +1,16 @@
-# Svelte Component Test Recipes (WIP)
+# Svelte Component Test Recipes
 
 Svelte component test recipes using Vitest & Testing Library with TypeScript
 
 In this repo, we'll use `vitest`, `@testing-library/svelte`, and `svelte-htm` to test Svelte components that seemed to be hard to test. Such as **two-way bindings**, **name slots**, **Context API**, ...etc.
 
-As a Svelte advocate, the fantastic DX is one of the reasons we love Svelte. While component testing is something that I think we can still improve over time.
+As a Svelte advocate, the fantastic DX is one of the reasons I love Svelte. While component testing is something that I think we can still improve over time.
 
 Feel free to open an issue or send a PR to add more test recipes. 😉
 
 ---
 ## Table of Contents
-- [Svelte Component Test Recipes (WIP)](#svelte-component-test-recipes-wip)
+- [Svelte Component Test Recipes](#svelte-component-test-recipes)
   - [Table of Contents](#table-of-contents)
   - [Setup](#setup)
     - [`vite.config.ts`](#viteconfigts)
@@ -941,3 +941,5 @@ it('render ExternalFetch', async () => {
 - [Common mistakes with React Testing Library by Kent C. Dodds](https://kentcdodds.com/blog/common-mistakes-with-react-testing-library#not-using-testing-libraryuser-event)
 - [Design Patterns for Building Reusable Svelte Components by Eric Liu](https://render.com/blog/svelte-design-patterns)
 - [Typing Components in Svelte by Andrew Lester](https://www.viget.com/articles/typing-components-in-svelte/)
+- [davipon/svelte-add-vitest - Svelte adder for Vitest](https://github.com/davipon/svelte-add-vitest)
+- [Test Svelte Component Using Vitest & Playwright](https://davipon.hashnode.dev/test-svelte-component-using-vitest-playwright)
