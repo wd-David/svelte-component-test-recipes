@@ -9,7 +9,9 @@ As a Svelte advocate, the fantastic DX is one of the reasons I love Svelte. Whil
 Feel free to open an issue or send a PR to add more test recipes. 😉
 
 ---
+
 ## Table of Contents
+
 - [Svelte Component Test Recipes](#svelte-component-test-recipes)
   - [Table of Contents](#table-of-contents)
   - [Setup](#setup)
@@ -168,6 +170,7 @@ vi.mock('$app/stores', (): typeof stores => {
 });
 
 ```
+
 > The `@testing-library/jest-dom` library provides a set of custom jest matchers that you can use to extend vitest. These will make your tests more declarative and clear to read and maintain. You can also check [Common mistakes with React Testing Library #Using the wrong-assertion](https://kentcdodds.com/blog/common-mistakes-with-react-testing-library#using-the-wrong-assertion).
 
 > SvelteKit runtime modules like `$app/stores` and `$app/navigation` are not set until SvelteKit's start function is called, which means you won't have them in a test environment because tests are isolated.
@@ -194,7 +197,7 @@ Here are the steps:
 2. Run `npx patch-package svelte`
 3. Add `"postinstall": "patch-package"` script in your `package.json`
 
-> Possible solution: https://github.com/testing-library/svelte-testing-library/issues/48#issuecomment-1240163835
+> Possible solution: <https://github.com/testing-library/svelte-testing-library/issues/48#issuecomment-1240163835>
 
 ---
 
@@ -205,6 +208,7 @@ OK! The setup is ready. Let's start with a simple component test.
 Here's our svelte component:
 
 `$lib/props/DefaultProps.svelte`
+
 ```svelte
 <script>
   export let answer = 'a mystery';
@@ -246,7 +250,7 @@ had improved props typing for `render` function:
 
 ![demo-props-test](./static/demo-props-test.gif)
 
-Sometimes you may want to predefined your props before passing. We can use Svelte's native utility type `ComponentProps`. `ComponentProps` takes in a Svelte component type and gives you a type corresponding to the component’s props.
+Sometimes you may want to predefine your props before passing. We can use Svelte's native utility type `ComponentProps`. `ComponentProps` takes in a Svelte component type and gives you a type corresponding to the component’s props.
 
 ```ts
 // $lib/props/DefaultProps.test.ts
@@ -270,6 +274,7 @@ it('Pass predefined prop to the component', () => {
 The component we're going to test has a button that'll dispatch a custom event `message` when you click on it. It's the component from [svelte.dev/tutorials/component-events](https://svelte.dev/tutorial/component-events).
 
 `$lib/events/ComponentEvent.svelte`
+
 ```svelte
 <script>
   import { createEventDispatcher } from 'svelte';
@@ -321,6 +326,7 @@ We first create a mock function and pass it to the `component.$on`, so we can mo
 We use `Keypad.svelte` from [svelte.dev/tutorial/component-bindings](https://svelte.dev/tutorial/component-bindings):
 
 `$lib/bindings/Keypad.svelte`
+
 ```svelte
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
@@ -365,7 +371,6 @@ We use `Keypad.svelte` from [svelte.dev/tutorial/component-bindings](https://sve
 ```
 
 There is no programmatic interface to test `bind:`, `use:`, slots, and Context API. Instead of creating a dummy svelte component (e.g. `TestHarness.svelte`) to test your component, we can use [`svelte-htm`](https://github.com/kenoxa/svelte-htm) to simplify your testing code.
-
 
 Assume we use `Keypad.svelte` in one of the `+page.svelte`:
 
@@ -457,7 +462,7 @@ import html from 'svelte-htm';
 import userEvent from '@testing-library/user-event';
 import { clickOutside } from './clickOutside';
 
-it('Test clickOuside svelte action', async () => {
+it('Test clickOutside svelte action', async () => {
   const user = userEvent.setup();
   const mock = vi.fn();
 
@@ -480,6 +485,7 @@ it('Test clickOuside svelte action', async () => {
 ## Testing slots
 
 We have four examples from [svelte.dev/slots](https://svelte.dev/tutorial/slot-fallbacks):
+
 - Slot fallbacks
 - Named slots
 - Optional slots
@@ -488,6 +494,7 @@ We have four examples from [svelte.dev/slots](https://svelte.dev/tutorial/slot-f
 ### Slot fallbacks
 
 `$lib/slot-fallbacks/Box.svelte`
+
 ```svelte
 <div class="box">
   <slot>
@@ -520,6 +527,7 @@ describe('Test slot fallbacks', () => {
 ### Named slots
 
 `$lib/named-slots/ContactCard.svelte`
+
 ```svelte
 <article class="contact-card">
   <h2>
@@ -568,6 +576,7 @@ describe('Test name slots', () => {
 > Check the implementation here: [svelte.dev/tutorial/optional-slots](https://svelte.dev/tutorial/optional-slots) or `src/lib/optional-slots/*`
 
 There are two components, and both accept slots:
+
 - `Comment.svelte`: Accepts any content in the slot
 - `Project.svelte`: Check if named slot `comments` exists
 
@@ -636,6 +645,7 @@ describe('Test optional slots', () => {
 ### Slot props
 
 `$lib/slot-props/Hoverable.svelte`
+
 ```svelte
 <script lang="ts">
   let hovering: boolean;
@@ -688,6 +698,7 @@ it('Test slot props', async () => {
 Here is the component that uses `getContext`:
 
 `$lib/contexts/ContextComponent.svelte`
+
 ```svelte
 <script>
   import { getContext } from 'svelte';
@@ -836,6 +847,7 @@ deps: {
 Here is a component that will fetch posts from an external endpoint:
 
 `$lib/data-fetching/ExternalFetch.svelte`
+
 ```svelte
 <script lang="ts">
   import axios from 'axios';
