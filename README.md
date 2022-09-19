@@ -8,6 +8,8 @@ As a Svelte advocate, the fantastic DX is one of the reasons I love Svelte. Whil
 
 Feel free to open an issue or send a PR to add more test recipes. 😉
 
+Blog post @hashnode: https://davipon.hashnode.dev/svelte-component-test-recipes
+
 ---
 
 ## Table of Contents
