@@ -323,6 +323,38 @@ it('Test ComponentEvent component', async () => {
 
 We first create a mock function and pass it to the `component.$on`, so we can monitor it whenever the component dispatch a `message` event.
 
+### Pure `vitest` events testing
+
+You can also test component events without `@testing-library` using only `vitest`:
+
+```ts
+import Component from '$lib/MyComponent.svelte'
+import { expect, test, vi } from 'vitest'
+
+test(`invokes callback functions`, async () => {
+  const keyup = vi.fn()
+  const click = vi.fn()
+
+  const instance = new Component({
+    target: document.body,
+    props: { foo: `bar` },
+  })
+
+  instance.$on(`keyup`, keyup)
+  instance.$on(`click`, click)
+
+  const node = document.querySelector(`.some-css-selector`)
+
+  if (!node) throw new Error(`DOM node not found`)
+
+  node.dispatchEvent(new KeyboardEvent(`keyup`, { key: `Enter` }))
+  expect(keyup).toHaveBeenCalledTimes(1)
+
+  node.dispatchEvent(new MouseEvent(`click`))
+  expect(click).toHaveBeenCalledTimes(1)
+})
+```
+
 ## Testing the `bind:` directive (two-way binding)
 
 We use `Keypad.svelte` from [svelte.dev/tutorial/component-bindings](https://svelte.dev/tutorial/component-bindings):
