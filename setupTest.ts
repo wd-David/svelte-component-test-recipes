@@ -38,7 +38,8 @@ vi.mock('$app/stores', (): typeof stores => {
 			routeId: null,
 			status: 200,
 			error: null,
-			data: {}
+			data: {},
+			form: undefined
 		});
 		const updated = { subscribe: readable(false).subscribe, check: () => false };
 
