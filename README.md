@@ -19,10 +19,10 @@ Blog post @hashnode: https://davipon.hashnode.dev/svelte-component-test-recipes
   - [Setup](#setup)
     - [`vite.config.ts`](#viteconfigts)
     - [`setupTest.ts`](#setuptestts)
-    - [Caveats - `svelte-htm` ⚠️](#caveats---svelte-htm-️)
   - [Testing component props](#testing-component-props)
     - [Get your component props type](#get-your-component-props-type)
   - [Testing component events](#testing-component-events)
+    - [Pure `vitest` events testing](#pure-vitest-events-testing)
   - [Testing the `bind:` directive (two-way binding)](#testing-the-bind-directive-two-way-binding)
   - [Testing the `use:` directive (Svelte Actions)](#testing-the-use-directive-svelte-actions)
   - [Testing slots](#testing-slots)
@@ -181,27 +181,6 @@ vi.mock('$app/stores', (): typeof stores => {
 > ![runtime-module-error](./static/runtime-module-error.jpg)
 >
 >In the context of unit testing, any small gaps in functionality can be resolved by simply mocking that module.
-
-### Caveats - `svelte-htm` ⚠️
-
-This repo use [`patch-package`](https://github.com/ds300/patch-package) to work around the issue when you pass `svelte-htm` inline component in a `render` function: [New component root property may throw errors #6584](https://github.com/sveltejs/svelte/issues/6584)
-
-Here are the steps:
-
-1. Change the source code in the `node_modules`:
-
-```diff
-// /node_modules/svelte/internal/index.mjs
-- root: options.target || parent_component.$$.root
-+ root: options.target || parent_component?.$$.root
-```
-
-2. Run `npx patch-package svelte`
-3. Add `"postinstall": "patch-package"` script in your `package.json`
-
-> Possible solution: <https://github.com/testing-library/svelte-testing-library/issues/48#issuecomment-1240163835>
-
----
 
 OK! The setup is ready. Let's start with a simple component test.
 
