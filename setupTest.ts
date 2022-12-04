@@ -13,7 +13,8 @@ expect.extend(matchers);
 vi.mock('$app/environment', (): typeof environment => ({
 	browser: false,
 	dev: true,
-	prerendering: false
+	building: false,
+	version: 'any'
 }));
 
 // Mock SvelteKit runtime module $app/navigation
@@ -24,8 +25,8 @@ vi.mock('$app/navigation', (): typeof navigation => ({
 	goto: () => Promise.resolve(),
 	invalidate: () => Promise.resolve(),
 	invalidateAll: () => Promise.resolve(),
-	prefetch: () => Promise.resolve(),
-	prefetchRoutes: () => Promise.resolve()
+	preloadData: () => Promise.resolve(),
+	preloadCode: () => Promise.resolve()
 }));
 
 // Mock SvelteKit runtime module $app/stores
@@ -35,7 +36,9 @@ vi.mock('$app/stores', (): typeof stores => {
 		const page = readable<Page>({
 			url: new URL('http://localhost'),
 			params: {},
-			routeId: null,
+			route: {
+			  id: null
+			},
 			status: 200,
 			error: null,
 			data: {},
