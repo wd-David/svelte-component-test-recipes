@@ -114,7 +114,8 @@ expect.extend(matchers);
 vi.mock('$app/environment', (): typeof environment => ({
   browser: false,
   dev: true,
-  prerendering: false
+  building: false,
+  version: 'any',
 }));
 
 // Mock SvelteKit runtime module $app/navigation
@@ -125,8 +126,8 @@ vi.mock('$app/navigation', (): typeof navigation => ({
   goto: () => Promise.resolve(),
   invalidate: () => Promise.resolve(),
   invalidateAll: () => Promise.resolve(),
-  prefetch: () => Promise.resolve(),
-  prefetchRoutes: () => Promise.resolve()
+  preloadData: () => Promise.resolve(),
+  preloadCode: () => Promise.resolve()
 }));
 
 // Mock SvelteKit runtime module $app/stores
@@ -773,10 +774,10 @@ Sometimes your component needs to interact with SvelteKit modules like `$app/sto
     </svg>
     <ul>
       <li class:active={$page.url.pathname === '/'}>
-        <a data-sveltekit-prefetch href="/">Home</a>
+        <a data-sveltekit-preload-data href="/">Home</a>
       </li>
       <li class:active={$page.url.pathname === '/about'}>
-        <a data-sveltekit-prefetch href="/about">About</a>
+        <a data-sveltekit-preload-data href="/about">About</a>
       </li>
     </ul>
   </nav>
