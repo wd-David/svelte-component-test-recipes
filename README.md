@@ -138,12 +138,12 @@ vi.mock('$app/stores', (): typeof stores => {
       url: new URL('http://localhost'),
       params: {},
       route: {
-			  id: null
-			},
+        id: null
+      },
       status: 200,
       error: null,
       data: {},
-			form: undefined
+      form: undefined
     });
     const updated = { subscribe: readable(false).subscribe, check: () => false };
 
