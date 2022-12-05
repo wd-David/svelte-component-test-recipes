@@ -137,10 +137,13 @@ vi.mock('$app/stores', (): typeof stores => {
     const page = readable<Page>({
       url: new URL('http://localhost'),
       params: {},
-      routeId: null,
+      route: {
+        id: null
+      },
       status: 200,
       error: null,
-      data: {}
+      data: {},
+      form: undefined
     });
     const updated = { subscribe: readable(false).subscribe, check: () => false };
 
