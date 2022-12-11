@@ -44,7 +44,7 @@ Let's install libraries in your SvelteKit project.
 
 ```bash
 # Minimal setup
-npm install -D vitest c8 @testing-library/svelte jsdom
+npm install -D vitest @vitest/coverage-c8 @testing-library/svelte jsdom
 # Companion libraries for Testing Library
 npm install -D @testing-library/jest-dom  @testing-library/dom @testing-library/user-event @types/testing-library__jest-dom
 # Test harness libraries
