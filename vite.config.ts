@@ -20,10 +20,6 @@ const config: UserConfig & { test: VitestConfig['test'] } = {
 		coverage: {
 			exclude: ['setupTest.ts', 'src/mocks']
 		},
-		deps: {
-			// Put Svelte component here, e.g., inline: [/svelte-multiselect/, /msw/]
-			inline: [/msw/]
-		},
 		// Exclude playwright tests folder
 		exclude: [...configDefaults.exclude, 'tests']
 	}

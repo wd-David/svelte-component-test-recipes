@@ -48,7 +48,7 @@ npm install -D vitest @vitest/coverage-c8 @testing-library/svelte jsdom
 # Companion libraries for Testing Library
 npm install -D @testing-library/jest-dom  @testing-library/dom @testing-library/user-event @types/testing-library__jest-dom
 # Test harness libraries
-npm install -D svelte-htm svelte-fragment-component patch-package
+npm install -D svelte-htm svelte-fragment-component
 
 ```
 
@@ -79,10 +79,6 @@ const config: UserConfig & { test: VitestConfig['test'] } = {
     // Exclude files in c8
     coverage: {
       exclude: ['setupTest.ts']
-    },
-    deps: {
-      // Put Svelte component here, e.g., inline: [/svelte-multiselect/, /msw/]
-      inline: []
     },
     // Exclude playwright tests folder
     exclude: [...configDefaults.exclude, 'tests']
