@@ -1,5 +1,7 @@
 # Svelte Component Test Recipes
 
+**Notes** This repo has upgraded to SvelteKit 1.0 🎉
+
 Svelte component test recipes using Vitest & Testing Library with TypeScript
 
 In this repo, we'll use `vitest`, `@testing-library/svelte`, and `svelte-htm` to test Svelte components that seemed to be hard to test. Such as **two-way bindings**, **name slots**, **Context API**, ...etc.
