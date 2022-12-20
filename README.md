@@ -1,6 +1,6 @@
 # Svelte Component Test Recipes
 
-**Notes** This repo has upgraded to SvelteKit 1.0 🎉
+> **Note** This repo has been upgraded to SvelteKit 1.0 🎉
 
 Svelte component test recipes using Vitest & Testing Library with TypeScript
 
