@@ -125,7 +125,7 @@ vi.mock('$app/navigation', (): typeof navigation => ({
   invalidate: () => Promise.resolve(),
   invalidateAll: () => Promise.resolve(),
   preloadData: () => Promise.resolve(),
-  preloadCode: () => Promise.resolve()
+  preloadCode: () => Promise.resolve(),
 }));
 
 // Mock SvelteKit runtime module $app/stores
@@ -143,7 +143,7 @@ vi.mock('$app/stores', (): typeof stores => {
       data: {},
       form: undefined
     });
-    const updated = { subscribe: readable(false).subscribe, check: () => false };
+    const updated = { subscribe: readable(false).subscribe, check: async () => false };
 
     return { navigating, page, updated };
   };
@@ -162,7 +162,7 @@ vi.mock('$app/stores', (): typeof stores => {
     subscribe(fn) {
       return getStores().updated.subscribe(fn);
     },
-    check: () => false
+    check: async () => false
   };
 
   return {
