@@ -44,7 +44,7 @@ vi.mock('$app/stores', (): typeof stores => {
 			data: {},
 			form: undefined
 		});
-		const updated = { subscribe: readable(false).subscribe, check: () => false };
+		const updated = { subscribe: readable(false).subscribe, check: async() => false };
 
 		return { navigating, page, updated };
 	};
@@ -63,7 +63,7 @@ vi.mock('$app/stores', (): typeof stores => {
 		subscribe(fn) {
 			return getStores().updated.subscribe(fn);
 		},
-		check: () => false
+		check: async () => false
 	};
 
 	return {
