@@ -19,7 +19,7 @@
 		"@sveltejs/adapter-auto": "2.1.0",
 		"@sveltejs/kit": "1.22.3",
 		"@testing-library/dom": "^9.0.0",
-		"@testing-library/jest-dom": "^5.16.5",
+		"@testing-library/jest-dom": "^6.0.0",
 		"@testing-library/svelte": "^4.0.0",
 		"@testing-library/user-event": "^14.4.3",
 		"@types/testing-library__jest-dom": "^5.14.5",
