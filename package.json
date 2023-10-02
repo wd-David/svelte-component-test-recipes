@@ -23,8 +23,8 @@
 		"@testing-library/svelte": "^4.0.0",
 		"@testing-library/user-event": "^14.4.3",
 		"@types/testing-library__jest-dom": "^5.14.5",
-		"@typescript-eslint/eslint-plugin": "6.7.2",
-		"@typescript-eslint/parser": "6.7.2",
+		"@typescript-eslint/eslint-plugin": "6.7.3",
+		"@typescript-eslint/parser": "6.7.3",
 		"@vitest/coverage-c8": "^0.33.0",
 		"axios": "^1.2.1",
 		"eslint": "^8.30.0",
@@ -42,7 +42,7 @@
 		"tslib": "^2.4.1",
 		"typescript": "^5.0.0",
 		"vite": "^4.0.2",
-		"vitest": "0.34.5"
+		"vitest": "0.34.6"
 	},
 	"type": "module"
 }
